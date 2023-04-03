@@ -1,0 +1,79 @@
+version: '3'
+
+networks:
+  project_net:
+    ipam:
+      config:
+        - subnet: 172.89.0.0/24
+
+services:
+  exporter:
+    image: exporter
+    build:
+      context: .
+      dockerfile: ./DockerFiles/exporter.dockerfile
+    restart: always
+    ports:
+    - "5070:5050"
+    volumes: 
+    - ./Templates:/usr/src/app/Templates
+    env_file:
+    - ./variables.env
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.10
+    links:
+    - assets
+  ia:
+    image: ia
+    build:
+      context: .
+      dockerfile: ./DockerFiles/ia.dockerfile
+    restart: always
+    ports:
+    - "5071:5050"
+    env_file:
+    - ./variables.env
+    environment:
+      mongo_bdd: ia
+      mongo_bdd_server: mongo_ia_data
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.11
+    links:
+    - mongo_ia_data
+  mongo_ia_data:
+    image: mongo:latest
+    restart: always
+    volumes: 
+    - ./db/mongo_ia_data:/data/db
+    env_file:
+    - ./variables.env
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.12
+  mongo_ia_data_express :
+    image: mongo-express:latest
+    restart: always
+    ports:
+    - "9071:8081"
+    env_file:
+    - ./variables.env
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo_ia_data
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.13
+    links:
+    - mongo_ia_data
+  assets:
+    ports:
+    - "9999:80"
+    image: httpd:latest
+    restart: always
+    volumes:
+    - ./assets:/usr/local/apache2/htdocs/files
+    - ./httpd_conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.14
