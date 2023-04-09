@@ -1,1 +1,64 @@
-<p>body works!</p>
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="card col-12">
+        <angular-tag-cloud
+          [data]="cloud_data"
+          [overflow]="false">
+        </angular-tag-cloud>
+        <div class="card-body">
+          <h5 class="card-title">Hashtags o palabras clave más utilizadas</h5>
+          <p class="card-text">hashtags o palabras clave específicas para rastrear el discurso machista, graficar cuáles son las más utilizadas y cuáles son los temas o conversaciones asociados al discurso machista.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-4">
+      <div class="card col-12">
+        <canvas
+          baseChart width="400" height="400"
+          [type]="'line'"
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          [legend]="lineChartLegend">
+        </canvas>
+        <div class="card-body" style="height: 200px;">
+          <h5 class="card-title">Frecuencia de tweets machistas</h5>
+          <p class="card-text">cantidad de tweets que se han identificado como machistas a lo largo del tiempo.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card col-12">
+        <canvas
+          baseChart width="400" height="400"
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [plugins]="barChartPlugins"
+          [legend]="barChartLegend"
+          [type]="'bar'">
+        </canvas>
+        <div class="card-body" style="height: 200px;">
+          <h5 class="card-title">Tendencias geográficas</h5>
+          <p class="card-text">tweets por ubicación geográfica, mostrar en qué regiones o países se identifican más tweets machistas.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card col-12">
+        <canvas
+          baseChart width="400" height="400"
+          [datasets]="radarChartDatasets"
+          [options]="radarChartOptions"
+          [labels]="radarChartLabels"
+          [type]="'radar'">
+        </canvas>
+        <div class="card-body" style="height: 200px;">
+          <h5 class="card-title">Distribución por género</h5>
+          <p class="card-text">discurso machista por genero, son las mujeres o los hombres quienes emiten este tipo de mensajes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

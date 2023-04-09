@@ -1,0 +1,13 @@
+Para crear una aplicación que monitoree el discurso machista en Twitter, hay algunas medidas que debes tomar en cuenta. Aquí te presento algunas recomendaciones:
+
+Definir los criterios de búsqueda: Es importante que definas los términos de búsqueda que utilizará la aplicación para identificar los tweets que contengan discurso machista. Esto implica definir las palabras clave, frases o hashtags que se usarán para rastrear los tweets relevantes.
+
+Configurar el API de Twitter: La aplicación necesitará conectarse con la API de Twitter para obtener los tweets que se ajustan a los criterios de búsqueda. Es importante que te registres como desarrollador en la plataforma de Twitter y que configures las credenciales necesarias para acceder al API.
+
+Programar la aplicación: Una vez definidos los criterios de búsqueda y configurado el API de Twitter, deberás programar la aplicación. Puedes utilizar un lenguaje de programación como Python, Ruby o PHP para crear la aplicación y definir las funciones necesarias para rastrear, analizar y almacenar los tweets.
+
+Analizar los tweets: Una vez que la aplicación ha recopilado los tweets relevantes, deberás analizar su contenido para identificar aquellos que contengan discurso machista. Esto puede implicar el uso de técnicas de procesamiento del lenguaje natural (PLN) como la detección de polaridad, el análisis de sentimiento o la identificación de temas.
+
+Presentar los resultados: Finalmente, debes presentar los resultados de manera clara y concisa para que los usuarios puedan entender el alcance del discurso machista en Twitter. Puedes utilizar gráficos, estadísticas o visualizaciones para resumir los datos obtenidos.
+
+Es importante destacar que la creación de una aplicación para monitorear el discurso machista en Twitter es una tarea compleja que implica no solo habilidades técnicas, sino también conocimientos sobre género y violencia contra las mujeres. Te sugiero que busques asesoría de expertos en el tema para garantizar que tu aplicación sea útil y respetuosa con los derechos humanos.
