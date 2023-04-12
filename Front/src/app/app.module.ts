@@ -12,6 +12,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 import { TagCloudComponent } from 'angular-tag-cloud-module';
 import { NgChartsModule } from 'ng2-charts';
+import { IawsService } from './services/iaws.service';
+import { ExporterService } from './services/exporter.service';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -24,6 +27,7 @@ import { NgChartsModule } from 'ng2-charts';
     TagCloudComponent,
     NgChartsModule,
     BrowserModule,
+    FormsModule,
     AppRoutingModule,
     NgbModule,
     HttpClientModule,
@@ -31,7 +35,7 @@ import { NgChartsModule } from 'ng2-charts';
     ToastrModule.forRoot(),
     NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' })
   ],
-  providers: [],
+  providers: [IawsService, ExporterService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -9,6 +9,7 @@ import json
 import uuid
 import jwt
 from dateutil import parser
+import random
 
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
@@ -28,7 +29,7 @@ class DefaultHandler(RequestHandler):
         self.set_header('Access-Control-Allow-Methods', '*')
 
     def get(self):
-        self.write({'response':'Administrador de Catálogos Operativo', 'status':200})
+        self.write({'response':'Servicio de Inteligencia Artificial Operativo', 'status':200})
 
 
 class ActionHandler(RequestHandler):
@@ -37,10 +38,10 @@ class ActionHandler(RequestHandler):
         self.set_header('Access-Control-Allow-Headers', '*')
         self.set_header('Access-Control-Allow-Methods', '*')
     
-    def options(self, catalog, action):
+    def options(self, action):
         pass
     
-    def post(self, catalog, action):
+    def post(self, action):
         content = json_decode(self.request.body)
         headers = self.request.headers
         token = headers['token']
@@ -48,124 +49,47 @@ class ActionHandler(RequestHandler):
         if auth == False:
             self.write({'response':'Acceso Denegado', 'status':'500'})
             return
-        if (action == 'upload_items'):
-            items = content['items']
-            respuesta = upload_items(catalog, items)
-        if (action == 'get_item'):
-            item_id = content['item_id']
-            output_model = content['output_model']
-            respuesta = get_item(catalog, item_id, output_model)
-        if (action == 'get_items'):
-            output_model = content['output_model']
-            respuesta = get_items(catalog, output_model)
-        if (action == 'update_item'):
-            item_id = content['item_id']
-            item = content['item']
-            respuesta = update_item(catalog, item_id, item)
-        if (action == 'search_items'):
-            attribute = content['attribute']
-            value = content['value']
-            output_model = content['output_model']
-            respuesta = search_items(catalog, attribute, value, output_model)
-        if (action == 'count'):
-            respuesta = count_items(catalog)
-        if (action == 'delete_item'):
-            item_id = content['item_id']
-            deleted = delete_item(catalog, item_id)
-            respuesta = {'response':'Elemento no encontrado', 'status':500}
-            if (deleted == True):
-                respuesta = {'response':'Elemento eliminado', 'status':200}
+        if (action == 'hashtags'):
+            respuesta = hashtags()
+        if (action == 'tweets'):
+            respuesta = tweets()
         self.write(respuesta)
         return
 
-def count_items(catalog):
-    collection = db[catalog]
-    documents_count = collection.count_documents({})
-    return {'response':documents_count, 'status':200}
+def hashtags():
+    collection = db['hashtags']
+    response = []
+    for w in range(100):
+        word = { 'text': 'palabra' + str(w), 'weight': random.randint(1, 10), 'rotate': random.randint(-90, 90)}
+        response.append(word)
+    return {'response':response, 'status':200}
 
-def upload_items(catalog, items):
-    collection = db[catalog]
-    log = []
-    for item in items:
-        item_id = str(uuid.uuid4())
-        item['item_id'] = item_id
-        item['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        collection.insert_one(item)
-        log.append(item)
-    toReturn = json.loads(json_util.dumps(log))
-    return {'response':toReturn, 'status':200}
-
-def search_items(catalog, attribute, value, output_model):
-    collection = db[catalog]
-    output_model['_id'] = False
-    output_model['item_id'] = True
-    output_model['timestamp'] = True
-    filter = {}
-    filter[attribute] = value
-    items = collection.find(filter, output_model)
-    items_to_return = json.loads(json_util.dumps(items))
-    if (len(items_to_return)>0):
-        toReturn = items_to_return
-        status = 200
-    else:
-        toReturn = 'Elemento no encontrado'
-        status = 500
-    return {'response':toReturn, 'status':status}
-
-def get_item(catalog, item_id, output_model):
-    collection = db[catalog]
-    output_model['_id'] = False
-    output_model['item_id'] = True
-    output_model['timestamp'] = True
-    filter = {"item_id":item_id}
-    items = collection.find(filter, output_model)
-    items_to_return = json.loads(json_util.dumps(items))
-    if (len(items_to_return)>0):
-        toReturn = items_to_return[0]
-        status = 200
-    else:
-        toReturn = 'Elemento no encontrado'
-        status = 500
-    return {'response':toReturn, 'status':status}
-
-def get_items(catalog, output_model):
-    collection = db[catalog]
-    output_model['_id'] = False
-    output_model['item_id'] = True
-    output_model['timestamp'] = True
-    items = collection.find({}, output_model)
-    items_to_return = json.loads(json_util.dumps(items))
-    return {'response':items_to_return, 'status':200}
-
-def update_item(catalog, item_id, item):
-    collection = db[catalog]
-    filter = {"item_id":item_id}
-    prev_items = collection.find(filter)
-    previous_items = json.loads(json_util.dumps(prev_items))
-    if (len(previous_items) == 0):
-        return {'response': 'Elemento no encontrado', 'status':500}
-    else:
-        item['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        collection.update_one(filter, {'$set':item})
-        log = []
-        log.append(item)
-        toReturn = json.loads(json_util.dumps(log))
-        return {'response':toReturn, 'status':200}
-
-def delete_item(catalog, item_id):
-    collection = db[catalog]
-    filter = {"item_id":item_id}
-    items = collection.find(filter, {
-        "item_id": True, 
-        "_id": False
-    })
-    items_to_return = json.loads(json_util.dumps(items))
-    if (len(items_to_return)>0):
-        collection.delete_one(filter)
-        toReturn = True
-    else:
-        toReturn = False
-    return toReturn
+def tweets():
+    collection = db['tweets']
+    lineChartLabels = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio']
+    lineChartDatasets = [
+        { 'data': [ 65, 59, 80, 81, 56, 55, 40 ], 'label': '2021', 'fill': True, 'tension': 0.5 },
+        { 'data': [ 40, 55, 56, 81, 80, 59, 65 ], 'label': '2022', 'fill': True, 'tension': 0.5 }
+    ]
+    barChartLabels = ['España', 'Ecuador', 'Estados Unidos', 'Alemania', 'Francia', 'Colombia', 'Brasil']
+    barChartDatasets = [
+        { 'data': [ 65, 59, 80, 81, 56, 55, 40 ], 'label': '2021' },
+        { 'data': [ 28, 48, 40, 19, 86, 27, 90 ], 'label': '2022' }
+    ]
+    radarChartLabels = ['España', 'Ecuador', 'Estados Unidos', 'Alemania', 'Francia', 'Colombia', 'Brasil']
+    radarChartDatasets = [
+        { 'data': [65, 59, 90, 81, 56, 55, 40], 'label': 'Hombres' },
+        { 'data': [28, 48, 40, 19, 96, 27, 100], 'label': 'Mujeres' }
+    ]
+    response = { 
+                    'lineChartLabels': lineChartLabels,
+                    'lineChartDatasets': lineChartDatasets,
+                    'barChartLabels': barChartLabels,
+                    'barChartDatasets': barChartDatasets,
+                    'radarChartLabels': radarChartLabels,
+                    'radarChartDatasets': radarChartDatasets,
+               }
+    return {'response':response, 'status':200}
 
 def validate_token(token):
     try:
@@ -182,7 +106,7 @@ def validate_token(token):
 def make_app():
     urls = [
         ("/", DefaultHandler),
-        ("/([^/]+)/([^/]+)", ActionHandler)
+        ("/([^/]+)", ActionHandler)
     ]
     return Application(urls, debug=True)
     
