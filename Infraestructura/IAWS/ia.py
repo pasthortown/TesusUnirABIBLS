@@ -10,6 +10,9 @@ import uuid
 import jwt
 from dateutil import parser
 import random
+import tweepy
+import spacy
+import nltk
 
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
@@ -18,9 +21,26 @@ mongo_password = os.getenv('mongo_password')
 app_secret = os.getenv('app_secret')
 allowed_app_name = os.getenv('allowed_app_name')
 
+api_key = os.getenv('twitter_api_key')
+api_key_secret = os.getenv('twitter_api_key_secret')
+access_token = os.getenv('twitter_access_token')
+access_token_secret = os.getenv('twitter_access_token_secret')
+
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
+
+nltk.download('stopwords')
+stop_words = nltk.corpus.stopwords.words('spanish')
+nlp = spacy.load('es_core_news_sm')
+
+auth = tweepy.OAuth1UserHandler(api_key, api_key_secret, access_token, access_token_secret)
+try:
+    api = tweepy.API(auth)
+    api.verify_credentials()
+    print('Conexión a Twitter Exitosa')
+except:
+    print('Conexión a Twitter Fallida')
 
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
@@ -56,6 +76,24 @@ class ActionHandler(RequestHandler):
         self.write(respuesta)
         return
 
+def get_tweets_by_hashtag(hashtag, since_date, until_date):
+    tweets = tweepy.Cursor(api.search_tweets, q=hashtag, lang="es", since_id=since_date, until=until_date).items()
+    tweets = api.search_tweets(q="#" + hashtag, tweet_mode="extended", lang="es", count=100)
+    femenine_words = ["mujer", "madre", "esposa", "novia", "hermana", "hija"]
+    masculine_words = ["hombre", "padre", "esposo", "novio", "hermano", "hijo"]
+    for tweet in tweets:
+        print("Fecha del tweet:", tweet.created_at)
+        print("Nombre del usuario:", tweet.user.name)
+        print("País de origen:", tweet.user.location)
+        print("Texto del tweet:", tweet.text)
+        description = tweet.user.description
+        doc = nlp(description)
+        for token in doc:
+            if token.text.lower() in femenine_words:
+                print("Género del usuario: Femenino")
+            elif token.text.lower() in masculine_words:
+                print("Género del usuario: Masculino")
+                
 def hashtags():
     collection = db['hashtags']
     response = []
