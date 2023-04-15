@@ -13,6 +13,13 @@ import random
 import tweepy
 import spacy
 import nltk
+import gender_guesser.detector as gender
+from country_list import countries_for_language
+import re
+import logging
+
+def write_log(content):
+    logging.info(content)
 
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
@@ -26,6 +33,9 @@ api_key_secret = os.getenv('twitter_api_key_secret')
 access_token = os.getenv('twitter_access_token')
 access_token_secret = os.getenv('twitter_access_token_secret')
 
+logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
+countries = dict(countries_for_language('es'))
+
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
@@ -38,9 +48,9 @@ auth = tweepy.OAuth1UserHandler(api_key, api_key_secret, access_token, access_to
 try:
     api = tweepy.API(auth)
     api.verify_credentials()
-    print('Conexión a Twitter Exitosa')
+    write_log('Conexión a Twitter Exitosa')
 except:
-    print('Conexión a Twitter Fallida')
+    write_log('Conexión a Twitter Fallida')
 
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
@@ -76,24 +86,42 @@ class ActionHandler(RequestHandler):
         self.write(respuesta)
         return
 
-def get_tweets_by_hashtag(hashtag, since_date, until_date):
-    tweets = tweepy.Cursor(api.search_tweets, q=hashtag, lang="es", since_id=since_date, until=until_date).items()
-    tweets = api.search_tweets(q="#" + hashtag, tweet_mode="extended", lang="es", count=100)
-    femenine_words = ["mujer", "madre", "esposa", "novia", "hermana", "hija"]
-    masculine_words = ["hombre", "padre", "esposo", "novio", "hermano", "hijo"]
+def get_tweets_by_hashtag(hashtag, since_date, until_date, items=100):
+    tweets = tweepy.Cursor(api.search_tweets, q=hashtag, lang="es", since_id=since_date, until=until_date).items(int(items))
+    detector = gender.Detector()
+    output = []
     for tweet in tweets:
-        print("Fecha del tweet:", tweet.created_at)
-        print("Nombre del usuario:", tweet.user.name)
-        print("País de origen:", tweet.user.location)
-        print("Texto del tweet:", tweet.text)
-        description = tweet.user.description
-        doc = nlp(description)
-        for token in doc:
-            if token.text.lower() in femenine_words:
-                print("Género del usuario: Femenino")
-            elif token.text.lower() in masculine_words:
-                print("Género del usuario: Masculino")
-                
+        caracteres_especiales = "@#$%^&*()_+=.,:"
+        user_name=str(tweet.user.name)
+        ubicacion = str(tweet.user.location)
+        for caracter in caracteres_especiales:
+            user_name = user_name.replace(caracter, "")
+            ubicacion = ubicacion.replace(caracter, "")
+        regex = r'\b{}\b'.format('|'.join(countries.values()))
+        match = re.search(regex, ubicacion, re.IGNORECASE)
+        twitter_pais = match.group(0) if match else None
+        nombres = user_name.split()
+        gender = None
+        for nombre in nombres:
+            gender = detector.get_gender(nombre)
+            if gender != 'unknown' and gender != None:
+                break
+        genero = 'female' if 'female' in str(gender) else 'male' if 'male' in str(gender) else 'unknown'
+        output.append({
+            'created_at': tweet.created_at,
+            'user_gender': genero,
+            'pais': twitter_pais,
+            'text': tweet.text,
+            'clasificado': 'Pendiente'
+        })
+    return output
+
+def search_keywords_in_text(text):
+    doc = nlp(text)
+    keywords = [token.text for token in doc if not token.is_stop and token.is_alpha]
+    keywords = [keyword for keyword in keywords if keyword.lower() not in stop_words]
+    return keywords
+
 def hashtags():
     collection = db['hashtags']
     response = []

@@ -37,6 +37,8 @@ services:
     environment:
       mongo_bdd: ia
       mongo_bdd_server: mongo_ia_data
+    volumes: 
+    - ./logs/logs_ia.txt:/usr/src/app/logs.txt
     networks:
       project_net:
         ipv4_address: 172.89.0.11
