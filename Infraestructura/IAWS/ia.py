@@ -122,13 +122,45 @@ def search_keywords_in_text(text):
     keywords = [keyword for keyword in keywords if keyword.lower() not in stop_words]
     return keywords
 
-def hashtags():
+def save_hashtags(hashtags):
     collection = db['hashtags']
-    response = []
-    for w in range(100):
-        word = { 'text': 'palabra' + str(w), 'weight': random.randint(1, 10), 'rotate': random.randint(-90, 90)}
-        response.append(word)
-    return {'response':response, 'status':200}
+    hashtags_on_db =  select_hasgtags_on_db()
+    for hashtag_to_add in hashtags:
+        found: False
+        for hashtag_on_db in hashtags_on_db:
+            if (hashtag_to_add == hashtag_on_db['hashtag']):
+                collection.update_one({'hashtag':hashtag_to_add}, { "$set": { 'count': int(hashtag_on_db['count']) + 1 } })
+                found = True
+        if (not found):
+            item = {
+                'item_id': str(uuid.uuid4()),
+                'hashtag': hashtag_to_add,
+                'count': 1,
+                'tweets': []
+            }
+            collection.insert_one(item)
+
+def select_hasgtags_on_db():
+    collection = db['hashtags']
+    output_model = {}
+    output_model['_id'] = False
+    output_model['item_id'] = True
+    output_model['hashtag'] = True
+    output_model['count'] = True
+    items = collection.find({}, output_model)
+    return json.loads(json_util.dumps(items))
+
+def hashtags():
+    hashtags_on_db =  select_hasgtags_on_db()
+    toReturn = []
+    for item in hashtags_on_db:
+        hashtag = {
+            'text': item['hashtag'],
+            'weight': item['count'],
+            'rotate': random.randint(0,1) * 90
+        }
+        toReturn.append(hashtag)
+    return {'response':toReturn, 'status':200}
 
 def tweets():
     collection = db['tweets']
