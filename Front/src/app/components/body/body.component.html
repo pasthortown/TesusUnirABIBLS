@@ -1,4 +1,12 @@
 <div class="container mt-3">
+  <div class="row">
+    <div class="col-12 mt-2 mb-2" style="text-align: right;">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary" (click)="get_data()">Actualizar</button>
+        <button type="button" class="btn btn-dark" (click)="openDialog(admin_dialog)">Administrar</button>
+      </div>
+    </div>
+  </div>
   <div class="row" *ngIf="ready_cloud_data">
     <div class="col-12">
       <div class="card col-12">
@@ -63,3 +71,14 @@
     </div>
   </div>
 </div>
+<ng-template #admin_dialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Administrar</h4>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')">
+       <span>&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <app-admin [hashtags]="cloud_data" (admin_done)="get_data()"></app-admin>
+  </div>
+</ng-template>

@@ -15,12 +15,14 @@ import { NgChartsModule } from 'ng2-charts';
 import { IawsService } from './services/iaws.service';
 import { ExporterService } from './services/exporter.service';
 import { FormsModule } from '@angular/forms';
+import { AdminComponent } from './components/admin/admin.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
-    BodyComponent
+    BodyComponent,
+    AdminComponent
   ],
   imports: [
     BrowserAnimationsModule,

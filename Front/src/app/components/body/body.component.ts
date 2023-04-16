@@ -5,6 +5,7 @@ import { CloudData } from 'angular-tag-cloud-module';
 import { ChartConfiguration, ChartOptions } from "chart.js";
 import { ExporterService } from 'src/app/services/exporter.service';
 import { IawsService } from 'src/app/services/iaws.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-body',
@@ -46,31 +47,38 @@ export class BodyComponent implements OnInit{
   constructor(
     private exporterServive: ExporterService,
     private iaService: IawsService,
+    private modalService: NgbModal,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
-    this.toastr.success('Prueba de Toaster', 'Exito');
-    this.spinner.show();
     this.get_data();
-    setTimeout(() => {
-      this.spinner.hide();
-    }, 5000);
+  }
+
+  openDialog(content: any) {
+    this.modalService.open(content, { centered: true, size: 'lg', backdrop: 'static', keyboard: false }).result.then(( response => {}), ( r => {}));
   }
 
   get_data() {
+    this.spinner.show();
     this.get_hashtags();
     this.get_tweets();
   }
 
   get_hashtags() {
+    this.ready_cloud_data = false;
     this.iaService.hashtags().then((r: any) => {
       this.cloud_data = r.response;
       this.ready_cloud_data = true;
+      this.toastr.success('Datos cargados satisfactoriamente', 'Hashtags');
+      if (this.ready_cloud_data && this.ready_tweet_data) {
+        this.spinner.hide();
+      }
     }).catch(e => { console.log(e); });
   }
 
   get_tweets() {
+    this.ready_tweet_data = false;
     this.iaService.tweets().then((r: any) => {
       let data = r.response;
       this.lineChartData = {
@@ -84,6 +92,10 @@ export class BodyComponent implements OnInit{
       this.radarChartLabels = data.radarChartLabels;
       this.radarChartDatasets = data.radarChartDatasets;
       this.ready_tweet_data = true;
+      this.toastr.success('Datos cargados satisfactoriamente', 'Tweets');
+      if (this.ready_cloud_data && this.ready_tweet_data) {
+        this.spinner.hide();
+      }
     }).catch(e => { console.log(e); });
   }
 }

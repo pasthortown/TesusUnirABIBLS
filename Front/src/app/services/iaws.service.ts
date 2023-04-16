@@ -22,6 +22,16 @@ export class IawsService {
     return this.http.post(environment.api_ia + 'tweets', JSON.stringify(data), this.options ).toPromise();
   }
 
+  search_tweets_and_store_on_db(hashtags: string[], since_date: string, until_date: string) {
+    this.build_headers();
+    const data = {
+      hashtags: hashtags,
+      since_date: since_date,
+      until_date: until_date
+    };
+    return this.http.post(environment.api_ia + 'search_tweets_and_store_on_db', JSON.stringify(data), this.options ).toPromise();
+  }
+
   hashtags() {
     this.build_headers();
     const data = {};

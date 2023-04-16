@@ -83,37 +83,45 @@ class ActionHandler(RequestHandler):
             respuesta = hashtags()
         if (action == 'tweets'):
             respuesta = tweets()
+        if (action == 'search_tweets_and_store_on_db'):
+            respuesta = search_tweets_and_store_on_db(content)
         self.write(respuesta)
         return
 
 def get_tweets_by_hashtag(hashtag, since_date, until_date, items=100):
-    tweets = tweepy.Cursor(api.search_tweets, q=hashtag, lang="es", since_id=since_date, until=until_date).items(int(items))
-    detector = gender.Detector()
+    numero_consultas_excedido = False
+    try:
+        tweets = tweepy.Cursor(api.search_tweets, q=hashtag, lang="es", since_id=since_date, until=until_date).items(int(items))
+    except tweepy.TooManyRequests:
+        write_log("Se excedió el límite de la tasa. Por favor espere 5 minutos antes de continuar.")
+        numero_consultas_excedido = True
     output = []
-    for tweet in tweets:
-        caracteres_especiales = "@#$%^&*()_+=.,:"
-        user_name=str(tweet.user.name)
-        ubicacion = str(tweet.user.location)
-        for caracter in caracteres_especiales:
-            user_name = user_name.replace(caracter, "")
-            ubicacion = ubicacion.replace(caracter, "")
-        regex = r'\b{}\b'.format('|'.join(countries.values()))
-        match = re.search(regex, ubicacion, re.IGNORECASE)
-        twitter_pais = match.group(0) if match else None
-        nombres = user_name.split()
-        gender = None
-        for nombre in nombres:
-            gender = detector.get_gender(nombre)
-            if gender != 'unknown' and gender != None:
-                break
-        genero = 'female' if 'female' in str(gender) else 'male' if 'male' in str(gender) else 'unknown'
-        output.append({
-            'created_at': tweet.created_at,
-            'user_gender': genero,
-            'pais': twitter_pais,
-            'text': tweet.text,
-            'clasificado': 'Pendiente'
-        })
+    if (not numero_consultas_excedido):
+        detector = gender.Detector()
+        for tweet in tweets:
+            caracteres_especiales = "@#$%^&*()_+=.,:"
+            user_name=str(tweet.user.name)
+            ubicacion = str(tweet.user.location)
+            for caracter in caracteres_especiales:
+                user_name = user_name.replace(caracter, "")
+                ubicacion = ubicacion.replace(caracter, "")
+            regex = r'\b{}\b'.format('|'.join(countries.values()))
+            match = re.search(regex, ubicacion, re.IGNORECASE)
+            twitter_pais = match.group(0) if match else None
+            nombres = user_name.split()
+            gender_detected = None
+            for nombre in nombres:
+                gender_detected = detector.get_gender(nombre)
+                if gender_detected != 'unknown' and gender_detected != None:
+                    break
+            genero = 'female' if 'female' in str(gender_detected) else 'male' if 'male' in str(gender_detected) else 'unknown'
+            output.append({
+                'created_at': tweet.created_at,
+                'user_gender': genero,
+                'pais': twitter_pais,
+                'text': tweet.text,
+                'clasificado': 'Pendiente'
+            })
     return output
 
 def search_keywords_in_text(text):
@@ -150,6 +158,35 @@ def select_hasgtags_on_db():
     items = collection.find({}, output_model)
     return json.loads(json_util.dumps(items))
 
+def search_tweets_and_store_on_db(content):
+    hashtags = content['hashtags']
+    since_date = content['since_date']
+    until_date = content['until_date']
+    collection = db['hashtags']
+    docs = collection.find({'tweets.0': {'$exists': True}})
+    fechas_distintas = set()
+    for doc in docs:
+        for tweet in doc['tweets']:
+            fecha = tweet['created_at']
+            fecha_fmt = fecha.strftime('%Y-%m-%d')
+            fechas_distintas.add(fecha_fmt)
+    fechas_distintas = sorted(list(fechas_distintas))
+    fecha_inicial_valida = True
+    fecha_final_valida = True
+    if (since_date in fechas_distintas):
+        fecha_inicial_valida = False
+    if (until_date in fechas_distintas):
+        fecha_final_valida = False
+    if (fecha_inicial_valida and fecha_final_valida):
+        for hashtag in hashtags:
+            tweets = get_tweets_by_hashtag(hashtag, since_date, until_date)
+            # q="#hashtag1 OR #hashtag2" es posible buscar varios hashtag a la vez y luego podemos clasificarlos
+            collection.update_one({'hashtag':hashtag}, { "$push": { 'tweets': {'$each': tweets} } })
+        return {'response':'success', 'status':200}
+    else:
+        write_log('Las fechas requeridas ya fueron analizadas anteriormente')
+        return {'response':'Las fechas requeridas ya fueron analizadas anteriormente', 'status':400}
+
 def hashtags():
     hashtags_on_db =  select_hasgtags_on_db()
     toReturn = []
@@ -163,7 +200,14 @@ def hashtags():
     return {'response':toReturn, 'status':200}
 
 def tweets():
-    collection = db['tweets']
+    collection = db['hashtags']
+    output_model = {}
+    output_model['_id'] = False
+    output_model['tweets'] = True
+    hashtags = json.loads(json_util.dumps(collection.find({}, output_model)))
+    tweets = []
+    for hashtag in hashtags:
+        tweets = tweets + hashtag['tweets']
     lineChartLabels = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio']
     lineChartDatasets = [
         { 'data': [ 65, 59, 80, 81, 56, 55, 40 ], 'label': '2021', 'fill': True, 'tension': 0.5 },
@@ -180,6 +224,7 @@ def tweets():
         { 'data': [28, 48, 40, 19, 96, 27, 100], 'label': 'Mujeres' }
     ]
     response = { 
+                    'tweets': tweets,
                     'lineChartLabels': lineChartLabels,
                     'lineChartDatasets': lineChartDatasets,
                     'barChartLabels': barChartLabels,
