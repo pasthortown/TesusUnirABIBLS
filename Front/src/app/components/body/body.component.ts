@@ -60,7 +60,7 @@ export class BodyComponent implements OnInit{
   }
 
   get_data() {
-    this.spinner.show();
+    // this.spinner.show();
     this.get_hashtags();
     this.get_tweets();
   }
