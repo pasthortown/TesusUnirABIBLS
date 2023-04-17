@@ -1,0 +1,13 @@
+logs
+INFO:tornado.access:200 OPTIONS /tweets (172.89.0.1) 0.40ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.89.0.1) 0.35ms
+INFO:tornado.access:200 POST /tweets (172.89.0.1) 0.74ms
+INFO:tornado.access:200 POST /hashtags (172.89.0.1) 16.62ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.89.0.1) 0.55ms
+INFO:tornado.access:200 OPTIONS /tweets (172.89.0.1) 0.40ms
+INFO:tornado.access:200 POST /hashtags (172.89.0.1) 17.66ms
+INFO:tornado.access:200 POST /tweets (172.89.0.1) 0.72ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.89.0.1) 0.43ms
+INFO:tornado.access:200 OPTIONS /tweets (172.89.0.1) 0.34ms
+INFO:tornado.access:200 POST /hashtags (172.89.0.1) 14.49ms
+INFO:tornado.access:200 POST /tweets (172.89.0.1) 0.70ms

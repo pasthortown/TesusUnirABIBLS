@@ -1,12 +1,4 @@
 <div class="container mt-3">
-  <div class="row">
-    <div class="col-12 mt-2 mb-2" style="text-align: right;">
-      <div class="btn-group" role="group">
-        <button type="button" class="btn btn-primary" (click)="get_data()">Actualizar</button>
-        <button type="button" class="btn btn-dark" (click)="openDialog(admin_dialog)">Administrar</button>
-      </div>
-    </div>
-  </div>
   <div class="row" *ngIf="ready_cloud_data">
     <div class="col-12">
       <div class="card col-12">
@@ -17,7 +9,10 @@
         </angular-tag-cloud>
         <div class="card-body">
           <h5 class="card-title">Hashtags o palabras clave más utilizadas</h5>
-          <p class="card-text">hashtags o palabras clave específicas para rastrear el discurso machista, graficar cuáles son las más utilizadas y cuáles son los temas o conversaciones asociados al discurso machista.</p>
+          <p class="card-text" style="text-align: justify;">
+            La gráfica que se presenta muestra las palabras clave identificadas en tweets machistas, las cuales han sido obtenidas mediante el uso de las librerías <a href="https://spacy.io/"><b>spaCy</b></a> y <a href="https://www.nltk.org/"><b>Natural Language Toolkit</b></a> de Python. El tamaño de las palabras en la gráfica indica su frecuencia de uso en los tweets.<br/>
+            Para llevar a cabo este análisis, cada tweet fue procesado con la librería <a href="https://spacy.io/"><b>spaCy</b></a> para identificar las palabras clave. Posteriormente, se utilizó la librería <a href="https://www.nltk.org/"><b>Natural Language Toolkit</b></a> para limpiar la lista de palabras clave identificadas, eliminando aquellas que no aportan significado (stopwords).
+          </p>
         </div>
       </div>
     </div>
@@ -71,14 +66,3 @@
     </div>
   </div>
 </div>
-<ng-template #admin_dialog let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title">Administrar</h4>
-    <button type="button" class="close" (click)="modal.dismiss('Cross click')">
-       <span>&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <app-admin [hashtags]="cloud_data" (admin_done)="get_data()"></app-admin>
-  </div>
-</ng-template>

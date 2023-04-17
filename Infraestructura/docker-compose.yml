@@ -24,11 +24,11 @@ services:
         ipv4_address: 172.89.0.10
     links:
     - assets
-  ia:
-    image: ia
+  backend_main:
+    image: backend_main
     build:
       context: .
-      dockerfile: ./DockerFiles/ia.dockerfile
+      dockerfile: ./DockerFiles/backend_main.dockerfile
     restart: always
     ports:
     - "5071:5050"
@@ -38,10 +38,27 @@ services:
       mongo_bdd: ia
       mongo_bdd_server: mongo_ia_data
     volumes: 
-    - ./logs/logs_ia.txt:/usr/src/app/logs.txt
+    - ./logs/logs_backend_main.txt:/usr/src/app/logs.txt
     networks:
       project_net:
         ipv4_address: 172.89.0.11
+    links:
+    - mongo_ia_data
+  data_analizer:
+    image: data_analizer
+    build:
+      context: .
+      dockerfile: ./DockerFiles/data_analizer.dockerfile
+    env_file:
+    - ./variables.env
+    environment:
+      mongo_bdd: ia
+      mongo_bdd_server: mongo_ia_data
+    volumes: 
+    - ./logs/logs_data_analizer.txt:/usr/src/app/logs.txt
+    networks:
+      project_net:
+        ipv4_address: 172.89.0.12
     links:
     - mongo_ia_data
   mongo_ia_data:
@@ -53,7 +70,7 @@ services:
     - ./variables.env
     networks:
       project_net:
-        ipv4_address: 172.89.0.12
+        ipv4_address: 172.89.0.13
   mongo_ia_data_express :
     image: mongo-express:latest
     restart: always
@@ -65,7 +82,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongo_ia_data
     networks:
       project_net:
-        ipv4_address: 172.89.0.13
+        ipv4_address: 172.89.0.14
     links:
     - mongo_ia_data
   assets:
@@ -78,4 +95,4 @@ services:
     - ./httpd_conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
     networks:
       project_net:
-        ipv4_address: 172.89.0.14
+        ipv4_address: 172.89.0.15

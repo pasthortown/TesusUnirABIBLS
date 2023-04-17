@@ -14,15 +14,13 @@ import { TagCloudComponent } from 'angular-tag-cloud-module';
 import { NgChartsModule } from 'ng2-charts';
 import { IawsService } from './services/iaws.service';
 import { ExporterService } from './services/exporter.service';
-import { FormsModule } from '@angular/forms';
-import { AdminComponent } from './components/admin/admin.component';
+import { FormsModule } from '@angular/forms'
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
-    BodyComponent,
-    AdminComponent
+    BodyComponent
   ],
   imports: [
     BrowserAnimationsModule,
