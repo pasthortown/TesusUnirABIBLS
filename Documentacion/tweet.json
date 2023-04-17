@@ -1,0 +1,55 @@
+{
+    "created_at": "Sat Apr 16 22:30:00 +0000 2023",
+    "id": 1234567890123456789,
+    "id_str": "1234567890123456789",
+    "text": "This is an example tweet",
+    "source": "<a href=\"http://example.com\" rel=\"nofollow\">Example App</a>",
+    "user": {
+      "id": 9876543210987654321,
+      "id_str": "9876543210987654321",
+      "name": "John Doe",
+      "screen_name": "johndoe",
+      "location": "New York, USA",
+      "url": "http://example.com",
+      "description": "I am a software developer",
+      "verified": false,
+      "followers_count": 1000,
+      "friends_count": 500,
+      "listed_count": 50,
+      "favourites_count": 100,
+      "statuses_count": 200
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "lang": "en",
+    "entities": {
+      "hashtags": [
+        {
+          "text": "example",
+          "indices": [
+            8,
+            16
+          ]
+        }
+      ],
+      "urls": [
+        {
+          "url": "http://example.com",
+          "expanded_url": "http://example.com",
+          "display_url": "example.com",
+          "indices": [
+            20,
+            43
+          ]
+        }
+      ],
+      "user_mentions": [],
+      "symbols": []
+    },
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false
+  }
+  
