@@ -14,6 +14,7 @@ import gender_guesser.detector as gender
 from country_list import countries_for_language
 import re
 import logging
+from collections import defaultdict
 
 def write_log(content):
     logging.info(content)
@@ -126,7 +127,7 @@ def search_tweets_and_store_on_db(content):
 def select_hasgtags_on_db():
     collection = db['tweets']
     pipeline = [
-        { "$match": { "hashtags": { "$not": { "$size": 0 } } } },
+        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Machista" } },
         { "$project": { "_id": 0, "hashtags": 1 } },
         { "$unwind": "$hashtags" },
         { "$group": { "_id": "$hashtags", "count": { "$sum": 1 } } },
@@ -142,21 +143,53 @@ def hashtags():
 
 def tweets():
     collection = db['tweets']
-    list_tweets = []
-    lineChartLabels = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio']
-    lineChartDatasets = [
-        { 'data': [ 65, 59, 80, 81, 56, 55, 40 ], 'label': '2021', 'fill': True, 'tension': 0.5 },
-        { 'data': [ 40, 55, 56, 81, 80, 59, 65 ], 'label': '2022', 'fill': True, 'tension': 0.5 }
+    meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+    pipeline = [
+        { "$match": { "clasificado": "Machista" } },
+        { "$project": { 
+            "_id": 0, 
+            "user_gender": 1,
+            "pais": 1,
+            "text": 1,
+            "clasificado": 1,
+            "created_at": 1, 
+            "month": { "$month": "$created_at" },
+            "month_name": { 
+                "$arrayElemAt": [
+                    meses,
+                    { "$subtract": [ { "$month": "$created_at" }, 1 ] }
+                ]
+            },
+            "year": { "$year": "$created_at" }
+        }}
     ]
-    barChartLabels = ['España', 'Ecuador', 'Estados Unidos', 'Alemania', 'Francia', 'Colombia', 'Brasil']
-    barChartDatasets = [
-        { 'data': [ 65, 59, 80, 81, 56, 55, 40 ], 'label': '2021' },
-        { 'data': [ 28, 48, 40, 19, 86, 27, 90 ], 'label': '2022' }
-    ]
-    radarChartLabels = ['España', 'Ecuador', 'Estados Unidos', 'Alemania', 'Francia', 'Colombia', 'Brasil']
+    list_tweets = json.loads(json_util.dumps(collection.aggregate(pipeline)))
+    lineChartLabels = meses
+    lineChartDatasets = []
+    tweet_counts = defaultdict(lambda: [0] * 12)
+    for tweet in list_tweets:
+        year = tweet["year"]
+        month = tweet["month"] - 1 
+        tweet_counts[year][month] += 1
+    for year in sorted(tweet_counts.keys()):
+        data = tweet_counts[year]
+        dataset = {'data': data, 'label': str(year), 'fill': True, 'tension': 0.5}
+        lineChartDatasets.append(dataset)
+    paises = list(set([str(tweet["pais"]).upper() for tweet in list_tweets]))
+    years = list(set([tweet["year"] for tweet in list_tweets]))
+    barChartLabels = paises
+    barChartDatasets = []
+    for year in years:
+        data = []
+        for pais in paises:
+            cuenta_tweets = sum(1 for tweet in list_tweets if str(tweet["pais"]).upper() == str(pais).upper() and tweet["year"] == year)
+            data.append(cuenta_tweets)
+        dataset = {'data': data, 'label': str(year)}
+        barChartDatasets.append(dataset)
+    radarChartLabels = paises
     radarChartDatasets = [
-        { 'data': [65, 59, 90, 81, 56, 55, 40], 'label': 'Hombres' },
-        { 'data': [28, 48, 40, 19, 96, 27, 100], 'label': 'Mujeres' }
+        # { 'data': [65, 59, 90, 81, 56, 55, 40], 'label': 'Hombres' },
+        # { 'data': [28, 48, 40, 19, 96, 27, 100], 'label': 'Mujeres' }
     ]
     response = { 
                     'tweets': list_tweets,

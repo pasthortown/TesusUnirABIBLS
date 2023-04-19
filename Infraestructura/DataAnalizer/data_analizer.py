@@ -44,4 +44,12 @@ def search_hashtags_from_tweets():
         hashtags = search_keywords_in_text(tweet['text'])
         collection.update_one( {'_id': tweet['_id']}, {'$set': {'hashtags': hashtags}} )
 
+def clasify_tweets():
+    collection = db['tweets']
+    tweets_to_process = collection.find({'clasificado': 'Pendiente'})
+    for tweet in tweets_to_process:
+        clasificacion = random.choice(['Machista', 'Normal'])
+        collection.update_one( {'_id': tweet['_id']}, {'$set': {'clasificado': clasificacion}} )
+
 search_hashtags_from_tweets()
+clasify_tweets()
