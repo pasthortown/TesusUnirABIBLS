@@ -21,18 +21,19 @@
             left: 0px;
             width: 100%;
             height: 4cm;
-            background-image: url('http://localhost:9999/files/images/pie.png'), url(data:image/png;base64,{{qr}});
+            background-image: url('http://assets/files/images/header_print.png'), url(data:image/png;base64,{{qr}});
             background-repeat: no-repeat, no-repeat;
-            background-position: 5cm 0cm, 0cm 0cm;
-            background-size: 80% auto, 3.5cm auto;
+            background-position: 0cm 0cm, 1cm 0cm;
+            background-size: 100% auto, 3.5cm auto;
         }
     </style>
     <body>
         <div class="header"></div>
-        <h2 style="text-align: center; width: 100%;"><strong>MONITOREO DEL DISCURSO XENOFÓBICO EN TWITTER</strong></h2>
+        
+        <div class="footer"></div>
         <div style="text-align: right; width: 100%;">{{fecha}}</div>
         <br/><br/>
-        <p style="text-align: justify; width: 100%;"><b>Hashtags o palabras clave más utilizadas</b><br/>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Hashtags o palabras clave más utilizadas</b><br/>
             La gráfica que se presenta muestra las palabras clave identificadas en tweets xenofóbicos, las cuales han sido obtenidas mediante el uso de las librerías <b>spaCy</b> y <b>Natural Language Toolkit</b> de Python. El tamaño de las palabras en la gráfica indica su frecuencia de uso en los tweets.<br/>
             Para llevar a cabo este análisis, cada tweet fue procesado con la librería <b>spaCy</b> para identificar las palabras clave. Posteriormente, se utilizó la librería <b>Natural Language Toolkit</b> para limpiar la lista de palabras clave identificadas, eliminando aquellas que no aportan significado (stopwords).</p>
         <br/><br/>
@@ -44,7 +45,7 @@
             </tbody>
         </table>
         <br/><br/>
-        <p style="text-align: justify; width: 100%;"><b>Frecuencia de tweets xenofóbicos</b><br/>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Frecuencia de tweets xenofóbicos</b><br/>
             La gráfica muestra la cantidad de tweets clasificados como xenofóbicos por mes.<br/>
             Utilizamos una red neuronal creada con <b>Keras</b> y entrenada con un dataset de 2000 tweets previamente clasificados para la tarea.</p>
         <br/><br/>
@@ -58,7 +59,7 @@
         <div class="page_break">
             <div class="header"></div>
         </div>
-        <p style="text-align: justify; width: 100%;"><b>Tendencias geográficas</b><br/>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Tendencias geográficas</b><br/>
             La gráfica muestra la cantidad de tweets por ubicación geográfica. La etiqueta "NONE" agrupa los tweets donde el usuario no especificó un país en la configuración de ubicación. Es posible que algunos tweets hayan sido emitidos desde una ubicación diferente a la establecida en la configuración.</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
@@ -69,7 +70,7 @@
             </tbody>
         </table>
         <br/><br/>
-        <p style="text-align: justify; width: 100%;"><b>Distribución por género</b><br/>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Distribución por género</b><br/>
             La gráfica representa el conteo de tweets clasificados como xenófobos y que se han agrupado según el género de sus autores.</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
@@ -82,7 +83,7 @@
         <div class="page_break">
             <div class="header"></div>
         </div>
-        <p style="text-align: justify; width: 100%;"><b>Tweets clasificados como Xenofóbicos en este mes</b><br/></p>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Tweets clasificados como Xenofóbicos en este mes</b><br/></p>
         <table style="text-align: left; width: 100%;">
             {% for tweet in tweets %}
             {% if loop.index % 20 == 0  %}

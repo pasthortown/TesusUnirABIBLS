@@ -199,7 +199,7 @@ def build_tweets_by_gender(list_tweets):
     for gender in genders:
         data = []
         for pais in paises:
-            cuenta_tweets = sum(1 for tweet in list_tweets if str(tweet["pais"]).upper() == str(pais).upper() and tweet["user_gender"] == gender)
+            cuenta_tweets = sum(1 for tweet in list_tweets if str(tweet["pais"]).upper() == str(pais).upper() and str(tweet["user_gender"]).upper() == str(gender).upper())
             data.append(cuenta_tweets)
         dataset = {'data': data, 'label': str(gender)}
         radarChartDatasets.append(dataset)

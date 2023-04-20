@@ -1,7 +1,7 @@
 <div class="container mt-3">
   <div class="row" *ngIf="ready_cloud_data">
     <div class="col-12">
-      <div class="card col-12">
+      <div class="card col-12" style="height: 40vh; overflow-y: auto; overflow: auto;">
         <angular-tag-cloud style="margin: auto;"
           [data]="cloud_data"
           [width]="1000"
@@ -21,16 +21,15 @@
     <div class="col-4">
       <div class="card col-12">
         <canvas
-          baseChart width="400" height="400"
+          baseChart width="400" height="300"
           [type]="'line'"
           [data]="lineChartData"
           [options]="lineChartOptions"
           [legend]="lineChartLegend">
         </canvas>
-        <div class="card-body" style="height: 200px;">
+        <div class="card-body" style="height: 150px;">
           <h5 class="card-title">Frecuencia de tweets xenofóbicos</h5>
-          <p class="card-text" style="text-align: justify;">La gráfica muestra la cantidad de tweets clasificados como xenofóbicos por mes.<br/>
-            Utilizamos una red neuronal creada con <a href="https://keras.io/">Keras</a> y entrenada con un dataset de 2000 tweets previamente clasificados para la tarea.
+          <p class="card-text" style="text-align: justify;">La gráfica muestra la cantidad de tweets clasificados como xenofóbicos por mes. Utilizamos una red neuronal creada con <a href="https://keras.io/">Keras</a> y entrenada con un dataset de 2000 tweets previamente clasificados.
           </p>
         </div>
       </div>
@@ -38,29 +37,29 @@
     <div class="col-4">
       <div class="card col-12">
         <canvas
-          baseChart width="400" height="400"
+          baseChart width="400" height="300"
           [data]="barChartData"
           [options]="barChartOptions"
           [plugins]="barChartPlugins"
           [legend]="barChartLegend"
           [type]="'bar'">
         </canvas>
-        <div class="card-body" style="height: 200px;">
+        <div class="card-body" style="height: 150px;">
           <h5 class="card-title">Tendencias geográficas</h5>
-          <p class="card-text" style="text-align: justify;">La gráfica muestra la cantidad de tweets por ubicación geográfica. La etiqueta "NONE" agrupa los tweets donde el usuario no especificó un país en la configuración de ubicación. Es posible que algunos tweets hayan sido emitidos desde una ubicación diferente a la establecida en la configuración.</p>
+          <p class="card-text" style="text-align: justify;">La gráfica muestra la cantidad de tweets por ubicación geográfica. La etiqueta "NONE" agrupa los tweets donde existe ambigüedad respecto al origen del tweet.</p>
         </div>
       </div>
     </div>
     <div class="col-4">
       <div class="card col-12">
         <canvas
-          baseChart width="400" height="400"
+          baseChart width="400" height="300"
           [datasets]="radarChartDatasets"
           [options]="radarChartOptions"
           [labels]="radarChartLabels"
           [type]="'radar'">
         </canvas>
-        <div class="card-body" style="height: 200px;">
+        <div class="card-body" style="height: 150px;">
           <h5 class="card-title">Distribución por género</h5>
           <p class="card-text">La gráfica representa el conteo de tweets clasificados como xenófobos y que se han agrupado según el género de sus autores.</p>
         </div>

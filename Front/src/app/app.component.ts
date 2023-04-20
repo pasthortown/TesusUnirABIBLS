@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment';
 import { Component } from '@angular/core';
 
 @Component({
@@ -6,5 +7,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Front';
+  assets = environment.api_assets;
+  title = 'Monitoreo de Discurso Xenofóbico en Twitter';
 }
