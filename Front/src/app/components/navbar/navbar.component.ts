@@ -44,7 +44,11 @@ export class NavbarComponent implements OnInit {
       let params: any = {
         qr: qr_response.response,
         fecha: fecha_actual.day + ' de ' + meses[fecha_actual.month] + ' de ' + fecha_actual.year,
-        tweets: tweets
+        tweets: tweets,
+        hashtags_img: sessionStorage.getItem('cloudword_img'),
+        lines_chart: sessionStorage.getItem('linechart_img'),
+        bars_chart: sessionStorage.getItem('barchart_img'),
+        radar_chart: sessionStorage.getItem('radarchart_img')
       };
       this.spinner.show();
       this.exporterService.build_pdf(params, 'report.html').then( r_exporter => {

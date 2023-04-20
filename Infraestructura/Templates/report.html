@@ -23,8 +23,8 @@
             height: 4cm;
             background-image: url('http://assets/files/images/header_print.png'), url(data:image/png;base64,{{qr}});
             background-repeat: no-repeat, no-repeat;
-            background-position: 0cm 0cm, 1cm 0cm;
-            background-size: 100% auto, 3.5cm auto;
+            background-position: 0cm 0cm, 3cm 0cm;
+            background-size: 100% 4cm, 3.5cm auto;
         }
     </style>
     <body>
@@ -40,7 +40,7 @@
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td>FOTO AQUI DE LA NUBE DE PALABRAS</td>
+                    <td><img src="{{hashtags_img}}"/></td>
                 </tr>
             </tbody>
         </table>
@@ -52,7 +52,7 @@
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td>FOTO AQUI DEL GRAFICO DE LINEAS</td>
+                    <td><img src="{{lines_chart}}" style="width: auto; height: 600px;"/></td>
                 </tr>
             </tbody>
         </table>
@@ -65,7 +65,7 @@
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td>FOTO AQUI DE BARRAS</td>
+                    <td><img src="{{bars_chart}}" style="width: auto; height: 600px;"/></td>
                 </tr>
             </tbody>
         </table>
@@ -76,7 +76,7 @@
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td>FOTO AQUI DE RADAR</td>
+                    <td><img src="{{radar_chart}}" style="width: auto; height: 600px;"/></td>
                 </tr>
             </tbody>
         </table>
