@@ -3,7 +3,6 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { CloudData } from 'angular-tag-cloud-module';
 import { ChartConfiguration, ChartOptions } from "chart.js";
-import { ExporterService } from 'src/app/services/exporter.service';
 import { IawsService } from 'src/app/services/iaws.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -45,7 +44,6 @@ export class BodyComponent implements OnInit{
   radarChartDatasets: ChartConfiguration<'radar'>['data']['datasets'] = [];
 
   constructor(
-    private exporterServive: ExporterService,
     private iaService: IawsService,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -81,6 +79,7 @@ export class BodyComponent implements OnInit{
     this.ready_tweet_data = false;
     this.iaService.tweets().then((r: any) => {
       let data = r.response;
+      sessionStorage.setItem('tweets', JSON.stringify(data.tweets));
       this.lineChartData = {
         labels: data.lineChartLabels,
         datasets: data.lineChartDatasets

@@ -16,7 +16,15 @@ export class ExporterService {
     this.options = {headers: headers};
   }
 
-  get() {
-    return this.http.get(environment.api_exporter).toPromise();
+  build_qr(content: string): Promise<any> {
+    this.build_headers();
+    const data = { toEncode: content };
+    return this.http.post(environment.api_exporter + 'qr', JSON.stringify(data), this.options).toPromise();
+  }
+
+  build_pdf(params: any, template_name: string): Promise<any> {
+    this.build_headers();
+    const data = {params: params, template_name: template_name};
+    return this.http.post(environment.api_exporter + 'pdf', JSON.stringify(data), this.options).toPromise();
   }
 }

@@ -4,6 +4,7 @@ from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
 from pymongo import MongoClient
 from datetime import datetime
+from datetime import date
 from bson import json_util
 import json
 import jwt
@@ -204,6 +205,15 @@ def build_tweets_by_gender(list_tweets):
         radarChartDatasets.append(dataset)
     return radarChartDatasets
 
+def get_current_month_tweets(list_tweets):
+    current_month = date.today().month
+    current_year = date.today().year
+    current_month_tweets = []
+    for tweet in list_tweets:
+        if tweet["month"] == current_month and tweet["year"] == current_year:
+            current_month_tweets.append(tweet)
+    return current_month_tweets
+
 def tweets():
     meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
     list_tweets = get_tweets_from_db()
@@ -215,7 +225,7 @@ def tweets():
     radarChartLabels = paises
     radarChartDatasets = build_tweets_by_gender(list_tweets)
     response = { 
-                    'tweets': list_tweets,
+                    'tweets': get_current_month_tweets(list_tweets),
                     'lineChartLabels': lineChartLabels,
                     'lineChartDatasets': lineChartDatasets,
                     'barChartLabels': barChartLabels,
