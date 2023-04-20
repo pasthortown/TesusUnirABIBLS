@@ -1,0 +1,1 @@
+"negro", "blanco", "hispano", "asiático", "árabe", "judío", "indígena", "mestizo", "indio", "mexicano", "estadounidense", "español", "francés", "musulmán", "judío", "cristiano", "budista", "hombre", "mujer", "transgénero", "homosexual", "bisexual", "heterosexual", "inmigrante", "emigrante", "refugiado"

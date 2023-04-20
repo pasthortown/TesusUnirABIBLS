@@ -127,7 +127,7 @@ def search_tweets_and_store_on_db(content):
 def select_hasgtags_on_db():
     collection = db['tweets']
     pipeline = [
-        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Machista" } },
+        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Xenofabia" } },
         { "$project": { "_id": 0, "hashtags": 1 } },
         { "$unwind": "$hashtags" },
         { "$group": { "_id": "$hashtags", "count": { "$sum": 1 } } },
@@ -141,11 +141,11 @@ def hashtags():
     toReturn = [{'text': h['hashtag'], 'weight': h['count'], 'rotate': i % 2 * 90} for i, h in enumerate(hashtags_on_db)]
     return {'response':toReturn, 'status':200}
 
-def tweets():
+def get_tweets_from_db():
     collection = db['tweets']
     meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
     pipeline = [
-        { "$match": { "clasificado": "Machista" } },
+        { "$match": { "clasificado": "Xenofabia" } },
         { "$project": { 
             "_id": 0, 
             "user_gender": 1,
@@ -163,8 +163,9 @@ def tweets():
             "year": { "$year": "$created_at" }
         }}
     ]
-    list_tweets = json.loads(json_util.dumps(collection.aggregate(pipeline)))
-    lineChartLabels = meses
+    return json.loads(json_util.dumps(collection.aggregate(pipeline)))
+
+def build_tweets_by_month(list_tweets):
     lineChartDatasets = []
     tweet_counts = defaultdict(lambda: [0] * 12)
     for tweet in list_tweets:
@@ -175,10 +176,12 @@ def tweets():
         data = tweet_counts[year]
         dataset = {'data': data, 'label': str(year), 'fill': True, 'tension': 0.5}
         lineChartDatasets.append(dataset)
+    return lineChartDatasets
+
+def build_tweets_by_country(list_tweets):
+    barChartDatasets = []
     paises = list(set([str(tweet["pais"]).upper() for tweet in list_tweets]))
     years = list(set([tweet["year"] for tweet in list_tweets]))
-    barChartLabels = paises
-    barChartDatasets = []
     for year in years:
         data = []
         for pais in paises:
@@ -186,11 +189,31 @@ def tweets():
             data.append(cuenta_tweets)
         dataset = {'data': data, 'label': str(year)}
         barChartDatasets.append(dataset)
+    return barChartDatasets
+
+def build_tweets_by_gender(list_tweets):
+    radarChartDatasets = []
+    genders = list(set([str(tweet["user_gender"]).upper() for tweet in list_tweets]))
+    paises = list(set([str(tweet["pais"]).upper() for tweet in list_tweets]))
+    for gender in genders:
+        data = []
+        for pais in paises:
+            cuenta_tweets = sum(1 for tweet in list_tweets if str(tweet["pais"]).upper() == str(pais).upper() and tweet["user_gender"] == gender)
+            data.append(cuenta_tweets)
+        dataset = {'data': data, 'label': str(gender)}
+        radarChartDatasets.append(dataset)
+    return radarChartDatasets
+
+def tweets():
+    meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+    list_tweets = get_tweets_from_db()
+    lineChartLabels = meses
+    lineChartDatasets = build_tweets_by_month(list_tweets)
+    barChartDatasets = build_tweets_by_country(list_tweets)
+    paises = list(set([str(tweet["pais"]).upper() for tweet in list_tweets]))
+    barChartLabels = paises
     radarChartLabels = paises
-    radarChartDatasets = [
-        # { 'data': [65, 59, 90, 81, 56, 55, 40], 'label': 'Hombres' },
-        # { 'data': [28, 48, 40, 19, 96, 27, 100], 'label': 'Mujeres' }
-    ]
+    radarChartDatasets = build_tweets_by_gender(list_tweets)
     response = { 
                     'tweets': list_tweets,
                     'lineChartLabels': lineChartLabels,

@@ -48,7 +48,7 @@ def clasify_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({'clasificado': 'Pendiente'})
     for tweet in tweets_to_process:
-        clasificacion = random.choice(['Machista', 'Normal'])
+        clasificacion = random.choice(['Xenofabia', 'Normal'])
         collection.update_one( {'_id': tweet['_id']}, {'$set': {'clasificado': clasificacion}} )
 
 search_hashtags_from_tweets()

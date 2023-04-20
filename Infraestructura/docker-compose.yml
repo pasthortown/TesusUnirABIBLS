@@ -7,6 +7,7 @@ networks:
         - subnet: 172.89.0.0/24
 
 services:
+  # Permite la generación y exportación de documentos PDF y códigos QR
   exporter:
     image: exporter
     build:
@@ -25,6 +26,7 @@ services:
     links:
     - assets
   backend_main:
+    # Conecta la BDD Mongo con el FRONTEND
     image: backend_main
     build:
       context: .
@@ -45,6 +47,7 @@ services:
     links:
     - mongo_ia_data
   data_analizer:
+    # IA que clasifica Tweets
     image: data_analizer
     build:
       context: .
@@ -62,6 +65,7 @@ services:
     links:
     - mongo_ia_data
   mongo_ia_data:
+    # Capa de Persistencia que almacena datos
     image: mongo:latest
     restart: always
     volumes: 
@@ -71,7 +75,8 @@ services:
     networks:
       project_net:
         ipv4_address: 172.89.0.13
-  mongo_ia_data_express :
+  mongo_ia_data_express:
+    # Interfaz de administracion de MongoDB
     image: mongo-express:latest
     restart: always
     ports:
@@ -86,6 +91,7 @@ services:
     links:
     - mongo_ia_data
   assets:
+    # Libreria de documentos, imagenes y videos
     ports:
     - "9999:80"
     image: httpd:latest
