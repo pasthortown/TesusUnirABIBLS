@@ -51,5 +51,14 @@ def clasify_tweets():
         clasificacion = random.choice(['Xenofabia', 'Normal'])
         collection.update_one( {'_id': tweet['_id']}, {'$set': {'clasificado': clasificacion}} )
 
+def ennumerate_tweets():
+    collection = db['tweets']
+    tweets_to_process = collection.find({})
+    count = 0
+    for tweet in tweets_to_process:
+        count = count + 1
+        collection.update_one( {'_id': tweet['_id']}, {'$set': {'tweet_id': count}} )
+    
 search_hashtags_from_tweets()
-clasify_tweets()
+# clasify_tweets()
+# ennumerate_tweets()

@@ -1,0 +1,38 @@
+<div class="row mt-5 mb-2">
+  <h1 class="text-right">Clasificación de Tweets</h1>
+</div>
+<div class="row">
+  <div class="col-12">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            Número
+          </th>
+          <th>
+            Texto
+          </th>
+          <th>
+            Clasificación
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tweet of tweets">
+          <th> {{tweet.tweet_id}} </th>
+          <td> {{tweet.text}} </td>
+          <td>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-warning" *ngIf="tweet.clasificado !== 'Pendiente'" (click)="classify_tweet(tweet.tweet_id, 'Pendiente')">Pendiente</button>
+              <button type="button" class="btn btn-warning" *ngIf="tweet.clasificado == 'Pendiente'">Pendiente</button>
+              <button type="button" class="btn btn-outline-danger" *ngIf="tweet.clasificado !== 'Xenofóbico'" (click)="classify_tweet(tweet.tweet_id, 'Xenofóbico')">Xenofóbico</button>
+              <button type="button" class="btn btn-danger" *ngIf="tweet.clasificado == 'Xenofóbico'">Xenofóbico</button>
+              <button type="button" class="btn btn-outline-success" *ngIf="tweet.clasificado !== 'Normal'" (click)="classify_tweet(tweet.tweet_id, 'Normal')">Normal</button>
+              <button type="button" class="btn btn-success" *ngIf="tweet.clasificado == 'Normal'">Normal</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

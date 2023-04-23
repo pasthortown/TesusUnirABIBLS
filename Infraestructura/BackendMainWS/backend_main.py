@@ -80,6 +80,10 @@ class ActionHandler(RequestHandler):
             respuesta = tweets()
         if (action == 'search_tweets_and_store_on_db'):
             respuesta = search_tweets_and_store_on_db(content)
+        if (action == 'get_tweets_to_process'):
+            respuesta = get_tweets_to_process()
+        if (action == 'update_tweet'):
+            respuesta = update_tweet(content)
         self.write(respuesta)
         return
 
@@ -128,7 +132,7 @@ def search_tweets_and_store_on_db(content):
 def select_hasgtags_on_db():
     collection = db['tweets']
     pipeline = [
-        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Xenofabia" } },
+        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Xenofóbico" } },
         { "$project": { "_id": 0, "hashtags": 1 } },
         { "$unwind": "$hashtags" },
         { "$group": { "_id": "$hashtags", "count": { "$sum": 1 } } },
@@ -146,7 +150,7 @@ def get_tweets_from_db():
     collection = db['tweets']
     meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
     pipeline = [
-        { "$match": { "clasificado": "Xenofabia" } },
+        { "$match": { "clasificado": "Xenofóbico" } },
         { "$project": { 
             "_id": 0, 
             "user_gender": 1,
@@ -234,6 +238,16 @@ def tweets():
                     'radarChartDatasets': radarChartDatasets,
                }
     return {'response':response, 'status':200}
+
+def get_tweets_to_process():
+    collection = db['tweets']
+    tweets_to_process = collection.find({'clasificado': 'Pendiente'})
+    return {'response':json.loads(json_util.dumps(tweets_to_process)), 'status':200}
+
+def update_tweet(data):
+    collection = db['tweets']
+    collection.update_one( {'tweet_id': data['tweet_id']}, {'$set': {'clasificado': data['clasificado']}} )
+    return {'response':'done', 'status':200}
 
 def validate_token(token):
     try:
