@@ -142,7 +142,8 @@ def select_hasgtags_on_db():
     return hashtags
 
 def hashtags():
-    hashtags_on_db =  select_hasgtags_on_db()
+    collection = db['hashtags']
+    hashtags_on_db = collection.find({})
     toReturn = [{'text': h['hashtag'], 'weight': h['count'], 'rotate': i % 2 * 90} for i, h in enumerate(hashtags_on_db)]
     return {'response':toReturn, 'status':200}
 

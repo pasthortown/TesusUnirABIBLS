@@ -37,8 +37,6 @@ access_token_secret = os.getenv('twitter_access_token_secret')
 logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
 countries = dict(countries_for_language('es'))
 
-logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
-
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
@@ -101,6 +99,9 @@ def get_tweets_by_query(query, since_date, until_date, items_count=100):
 
 def search_tweets_and_store_on_db(since_date, until_date):
     hashtags_on_db = select_hasgtags_on_db()
+    collection_h = db['hashtags']
+    collection_h.drop()
+    collection_h.insert_many(hashtags_on_db)
     hashtags = [h['hashtag'] for h in hashtags_on_db]
     collection = db['tweets']
     query = " OR #".join(["#" + hashtag for hashtag in hashtags])
@@ -169,4 +170,4 @@ def search_new_tweets():
 
 search_hashtags_from_tweets()
 # clasify_tweets()
-# ennumerate_tweets()
+ennumerate_tweets()
