@@ -72,10 +72,21 @@ class ActionHandler(RequestHandler):
             respuesta = get_all_tweets()
         if (action == 'upload_tweets_backup'):
             respuesta = upload_tweets_backup(content['tweets'])
+        if (action == 'upload_hashtags_backup'):
+            respuesta = upload_hashtags_backup(content['hashtags'])
         if (action == 'update_tweet'):
             respuesta = update_tweet(content)
         self.write(respuesta)
         return
+
+# Función para cargar a la base de datos Mongo el backup de Hashtags
+def upload_hashtags_backup(hashtags):
+    collection_t = db['hashtags']
+    collection_t.drop()
+    collection = db['hashtags']
+    for hashtag in hashtags:
+        collection.insert_one(hashtag)
+    return {'response':'success', 'status':200}
 
 # Función para cargar a la base de datos Mongo el backup de Tweets
 def upload_tweets_backup(tweets):

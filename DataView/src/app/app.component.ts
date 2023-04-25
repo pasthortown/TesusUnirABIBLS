@@ -55,26 +55,30 @@ export class AppComponent {
     this.download(JSON.stringify(this.tweets), 'tweets.json');
   }
 
-  upload_hashtags() {
-    // listo
-  }
-
-  upload_tweets() {
-    // listo
-  }
-
-  // <input type="file" (change)="onFileSelected($event)">
-
-  onFileSelected(event: any) {
+  upload_hashtags(event: any) {
     const file = event.target.files[0];
-    this.readFileContent(file);
-  }
-
-  private readFileContent(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
       const content = reader.result as string;
-      console.log(content);
+      this.spinner.show();
+      this.iaService.upload_hashtags_backup(JSON.parse(content)).then((r: any) => {
+        this.spinner.hide();
+        this.toastr.success('Carga Realizada Satisfactoriamente', 'Hashtags');
+      }).catch((e: any) => { console.log(e); });
+    };
+    reader.readAsText(file);
+  }
+
+  upload_tweets(event: any) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = reader.result as string;
+      this.spinner.show();
+      this.iaService.upload_tweets_backup(JSON.parse(content)).then((r: any) => {
+        this.spinner.hide();
+        this.toastr.success('Carga Realizada Satisfactoriamente', 'Tweets');
+      }).catch((e: any) => { console.log(e); });
     };
     reader.readAsText(file);
   }

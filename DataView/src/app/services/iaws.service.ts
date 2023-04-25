@@ -34,6 +34,12 @@ export class IawsService {
     return this.http.post(environment.api_ia + 'upload_tweets_backup', JSON.stringify(data), this.options ).toPromise();
   }
 
+  upload_hashtags_backup(hashtags: any[]) {
+    this.build_headers();
+    const data = {hashtags: hashtags};
+    return this.http.post(environment.api_ia + 'upload_hashtags_backup', JSON.stringify(data), this.options ).toPromise();
+  }
+
   update_tweet(tweet_id: Number, clasificado: string) {
     this.build_headers();
     const data = {
