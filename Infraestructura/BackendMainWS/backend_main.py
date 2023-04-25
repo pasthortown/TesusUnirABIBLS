@@ -78,6 +78,10 @@ class ActionHandler(RequestHandler):
             respuesta = hashtags()
         if (action == 'tweets'):
             respuesta = tweets()
+        if (action == 'get_all_tweets'):
+            respuesta = get_all_tweets()
+        if (action == 'upload_tweets_backup'):
+            respuesta = upload_tweets_backup(content['tweets'])
         if (action == 'search_tweets_and_store_on_db'):
             respuesta = search_tweets_and_store_on_db(content)
         if (action == 'get_tweets_to_process'):
@@ -86,6 +90,14 @@ class ActionHandler(RequestHandler):
             respuesta = update_tweet(content)
         self.write(respuesta)
         return
+
+def upload_tweets_backup(tweets):
+    collection_t = db['tweets']
+    collection_t.drop()
+    collection = db['tweets']
+    for tweet in tweets:
+        collection.insert_one(tweet)
+    return {'response':'success', 'status':200}
 
 def get_tweets_by_query(query, since_date, until_date, items_count=100):
     tweets = tweepy.Cursor(api.search_tweets, q=query, lang="es", since_id=since_date, until=until_date).items(int(items_count))
@@ -146,6 +158,11 @@ def hashtags():
     hashtags_on_db = collection.find({})
     toReturn = [{'text': h['hashtag'], 'weight': h['count'], 'rotate': i % 2 * 90} for i, h in enumerate(hashtags_on_db)]
     return {'response':toReturn, 'status':200}
+
+def get_all_tweets():
+    collection = db['tweets']
+    tweets = json.loads(json_util.dumps(collection.find({})))
+    return {'response':tweets, 'status':200}
 
 def get_tweets_from_db():
     collection = db['tweets']
