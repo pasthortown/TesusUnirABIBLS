@@ -1,6 +1,6 @@
 # Importación las bibliotecas de Python necesarias para realizar tareas, entre las que podemos mencionar:
 #  - Conexión con MongoDB
-#  - Levantamiento de API web
+#  - Levantamiento de api web
 
 import os
 from tornado.ioloop import IOLoop
@@ -13,14 +13,16 @@ from bson import json_util
 import json
 import jwt
 from dateutil import parser
+import tweepy
+import gender_guesser.detector as gender
+from country_list import countries_for_language
+import re
 import logging
 from collections import defaultdict
 
-# Función para escribir en el archivo de log
 def write_log(content):
     logging.info(content)
 
-# Se obtienen las credenciales para conectarse a la base de datos de MongoDB y a la API de Twitter desde variables de entorno
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
 mongo_user = os.getenv('mongo_user')
@@ -28,15 +30,26 @@ mongo_password = os.getenv('mongo_password')
 app_secret = os.getenv('app_secret')
 allowed_app_name = os.getenv('allowed_app_name')
 
-# Configuración del logger
-logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
+api_key = os.getenv('twitter_api_key')
+api_key_secret = os.getenv('twitter_api_key_secret')
+access_token = os.getenv('twitter_access_token')
+access_token_secret = os.getenv('twitter_access_token_secret')
 
-# Conexión a la base de datos de MongoDB
+logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
+countries = dict(countries_for_language('es'))
+
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
 
-# Levantamiento del API URL "/" HTTP: GET
+auth = tweepy.OAuth1UserHandler(api_key, api_key_secret, access_token, access_token_secret)
+try:
+    api = tweepy.API(auth)
+    api.verify_credentials()
+    write_log('Conexión a Twitter Exitosa')
+except:
+    write_log('Conexión a Twitter Fallida')
+
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -46,7 +59,7 @@ class DefaultHandler(RequestHandler):
     def get(self):
         self.write({'response':'Servicio de Inteligencia Artificial Operativo', 'status':200})
 
-# Levantamiento del API HTTP: POST
+
 class ActionHandler(RequestHandler):
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -72,12 +85,15 @@ class ActionHandler(RequestHandler):
             respuesta = get_all_tweets()
         if (action == 'upload_tweets_backup'):
             respuesta = upload_tweets_backup(content['tweets'])
+        if (action == 'search_tweets_and_store_on_db'):
+            respuesta = search_tweets_and_store_on_db(content)
+        if (action == 'get_tweets_to_process'):
+            respuesta = get_tweets_to_process()
         if (action == 'update_tweet'):
             respuesta = update_tweet(content)
         self.write(respuesta)
         return
 
-# Función para cargar a la base de datos Mongo el backup de Tweets
 def upload_tweets_backup(tweets):
     collection_t = db['tweets']
     collection_t.drop()
@@ -86,20 +102,71 @@ def upload_tweets_backup(tweets):
         collection.insert_one(tweet)
     return {'response':'success', 'status':200}
 
-# Función que devuelve los hashtags almacenados en la base de datos
+def get_tweets_by_query(query, since_date, until_date, items_count=100):
+    tweets = tweepy.Cursor(api.search_tweets, q=query, lang="es", since_id=since_date, until=until_date).items(int(items_count))
+    output = []
+    detector = gender.Detector()
+    for tweet in tweets:
+        caracteres_especiales = "@#$%^&*()_+=.,:"
+        user_name=str(tweet.user.name)
+        ubicacion = str(tweet.user.location)
+        for caracter in caracteres_especiales:
+            user_name = user_name.replace(caracter, "")
+            ubicacion = ubicacion.replace(caracter, "")
+        regex = r'\b{}\b'.format('|'.join(countries.values()))
+        match = re.search(regex, ubicacion, re.IGNORECASE)
+        twitter_pais = match.group(0) if match else None
+        nombres = user_name.split()
+        gender_detected = None
+        for nombre in nombres:
+            gender_detected = detector.get_gender(nombre)
+            if gender_detected != 'unknown' and gender_detected != None:
+                break
+        genero = 'female' if 'female' in str(gender_detected) else 'male' if 'male' in str(gender_detected) else 'unknown'
+        output.append({
+            'created_at': tweet.created_at,
+            'user_gender': genero,
+            'pais': twitter_pais,
+            'text': tweet.text,
+            'hashtags': [],
+            'clasificado': 'Pendiente'
+        })
+    return output
+
+def search_tweets_and_store_on_db(content):
+    hashtags = content['hashtags']
+    collection = db['tweets']
+    since_date = content['since_date']
+    until_date = content['until_date']
+    query = " OR #".join(["#" + hashtag for hashtag in hashtags])
+    tweets = get_tweets_by_query(query, since_date, until_date)
+    if len(tweets) > 0:
+        result_mongo = collection.insert_many(tweets)
+    return {'response':'success', 'status':200}
+
+def select_hasgtags_on_db():
+    collection = db['tweets']
+    pipeline = [
+        { "$match": { "hashtags": { "$not": { "$size": 0 } }, "clasificado": "Xenofóbico" } },
+        { "$project": { "_id": 0, "hashtags": 1 } },
+        { "$unwind": "$hashtags" },
+        { "$group": { "_id": "$hashtags", "count": { "$sum": 1 } } },
+        { "$project": { "_id": 0, "hashtag": "$_id", "count": 1 } }
+    ]
+    hashtags = collection.aggregate(pipeline)
+    return hashtags
+
 def hashtags():
     collection = db['hashtags']
     hashtags_on_db = collection.find({})
     toReturn = [{'text': h['hashtag'], 'weight': h['count'], 'rotate': i % 2 * 90} for i, h in enumerate(hashtags_on_db)]
     return {'response':toReturn, 'status':200}
 
-# Función que devuelve todos los tweets almacenados
 def get_all_tweets():
     collection = db['tweets']
     tweets = json.loads(json_util.dumps(collection.find({})))
     return {'response':tweets, 'status':200}
 
-# Función que devuelve los tweets almacenados en la base de datos y clasificados como Xenofóbicos
 def get_tweets_from_db():
     collection = db['tweets']
     meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
@@ -124,7 +191,6 @@ def get_tweets_from_db():
     ]
     return json.loads(json_util.dumps(collection.aggregate(pipeline)))
 
-# Función para construir el gráfico de líneas correspondiente a los tweets clasificados omo Xenofóbico por mes
 def build_tweets_by_month(list_tweets):
     lineChartDatasets = []
     tweet_counts = defaultdict(lambda: [0] * 12)
@@ -138,7 +204,6 @@ def build_tweets_by_month(list_tweets):
         lineChartDatasets.append(dataset)
     return lineChartDatasets
 
-# Función para construir el gráfico de barras correspondiente a los tweets clasificados omo Xenofóbico por país
 def build_tweets_by_country(list_tweets):
     barChartDatasets = []
     paises = list(set([str(tweet["pais"]).upper() for tweet in list_tweets]))
@@ -152,7 +217,6 @@ def build_tweets_by_country(list_tweets):
         barChartDatasets.append(dataset)
     return barChartDatasets
 
-# Función para construir el gráfico de radar correspondiente a los tweets clasificados omo Xenofóbico por género y país
 def build_tweets_by_gender(list_tweets):
     radarChartDatasets = []
     genders = list(set([str(tweet["user_gender"]).upper() for tweet in list_tweets]))
@@ -166,7 +230,6 @@ def build_tweets_by_gender(list_tweets):
         radarChartDatasets.append(dataset)
     return radarChartDatasets
 
-# Función para obtener los tweets clasificados como Xenofóbico en el mes
 def get_current_month_tweets(list_tweets):
     current_month = date.today().month
     current_year = date.today().year
@@ -176,7 +239,6 @@ def get_current_month_tweets(list_tweets):
             current_month_tweets.append(tweet)
     return current_month_tweets
 
-# Función para devolver la información para las gráficas
 def tweets():
     meses = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
     list_tweets = get_tweets_from_db()
@@ -198,13 +260,16 @@ def tweets():
                }
     return {'response':response, 'status':200}
 
-# Función para actualizar un tweet desde la interfaz DataView para entrenamiento y corrección de clasificación del modelo
+def get_tweets_to_process():
+    collection = db['tweets']
+    tweets_to_process = collection.find({'clasificado': 'Pendiente'})
+    return {'response':json.loads(json_util.dumps(tweets_to_process)), 'status':200}
+
 def update_tweet(data):
     collection = db['tweets']
     collection.update_one( {'tweet_id': data['tweet_id']}, {'$set': {'clasificado': data['clasificado']}} )
     return {'response':'done', 'status':200}
 
-# Validación del token JWT para autorizar la comunicación con el API
 def validate_token(token):
     try:
         response = jwt.decode(token, app_secret, algorithms=['HS256'])
@@ -217,7 +282,6 @@ def validate_token(token):
     except:
         return False
 
-# Función para inicializar el API
 def make_app():
     urls = [
         ("/", DefaultHandler),
@@ -225,7 +289,6 @@ def make_app():
     ]
     return Application(urls, debug=True)
     
-# Este código pone en marcha el servicio del API en el puerto 5050
 if __name__ == '__main__':
     app = make_app()
     app.listen(5050)

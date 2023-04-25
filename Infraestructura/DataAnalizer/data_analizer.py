@@ -1,27 +1,30 @@
+# Importación las bibliotecas de Python necesarias para realizar tareas, entre las que podemos mencionar:
+#  - Conexión con MongoDB
+#  - Manipulación de fechas y horas
+#  - Procesamiento de lenguaje natural
+#  - La clasificación de texto
+#  - Conexión al API de twitter 
+
 import os
 from pymongo import MongoClient
 import datetime
 from datetime import timedelta
-from bson import json_util
-import json
-from dateutil import parser
-import random
 import spacy
 import nltk
 import re
 import logging
-from collections import Counter
 import tensorflow as tf
-import pandas as pd
 import tweepy
 import gender_guesser.detector as gender
 from country_list import countries_for_language
 import re
 import time
 
+# Función para escribir en el archivo de log
 def write_log(content):
     logging.info(content)
 
+# Se obtienen las credenciales para conectarse a la base de datos de MongoDB y a la API de Twitter desde variables de entorno
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
 mongo_user = os.getenv('mongo_user')
@@ -34,17 +37,32 @@ api_key_secret = os.getenv('twitter_api_key_secret')
 access_token = os.getenv('twitter_access_token')
 access_token_secret = os.getenv('twitter_access_token_secret')
 
+# Configuración del logger
 logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
+
+# Prueba de autenticación con Twitter
+auth = tweepy.OAuth1UserHandler(api_key, api_key_secret, access_token, access_token_secret)
+try:
+    api = tweepy.API(auth)
+    api.verify_credentials()
+    write_log('Conexión a Twitter Exitosa')
+except:
+    write_log('Conexión a Twitter Fallida')
+
+# Diccionario de países
 countries = dict(countries_for_language('es'))
 
+# Conexión a la base de datos de MongoDB
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
 
+# Descarga de paquetes y modelos de lenguaje
 nltk.download('stopwords')
 stop_words = nltk.corpus.stopwords.words('spanish') + ['rt']
 nlp = spacy.load('es_core_news_sm')
 
+# Función para verificar si la hora actual se encuentra entre un rango dado de horas
 def hora_actual_entre_rango(inicio, fin):
     hora_actual = datetime.datetime.now().time()
     hora_inicio = datetime.time.fromisoformat(inicio)
@@ -53,7 +71,8 @@ def hora_actual_entre_rango(inicio, fin):
         return True
     else:
         return False
-
+    
+# Función para obtener los hashtags de la base de datos de tweets clasificados como "Xenofóbico"
 def select_hasgtags_on_db():
     collection = db['tweets']
     pipeline = [
@@ -66,6 +85,7 @@ def select_hasgtags_on_db():
     hashtags = collection.aggregate(pipeline)
     return hashtags
 
+# Función para obtener tweets a partir de una consulta y almacenarlos en la base de datos
 def get_tweets_by_query(query, since_date, until_date, items_count=100):
     tweets = tweepy.Cursor(api.search_tweets, q=query, lang="es", since_id=since_date, until=until_date).items(int(items_count))
     output = []
@@ -97,6 +117,7 @@ def get_tweets_by_query(query, since_date, until_date, items_count=100):
         })
     return output
 
+# Función encargada de buscar tweets por fecha y almacenarlos en la base de datos
 def search_tweets_and_store_on_db(since_date, until_date):
     hashtags_on_db = select_hasgtags_on_db()
     collection_h = db['hashtags']
@@ -109,12 +130,14 @@ def search_tweets_and_store_on_db(since_date, until_date):
     if len(tweets) > 0:
         result_mongo = collection.insert_many(tweets)
 
+# Función encargada de buscar las palabras principales en un texto
 def search_keywords_in_text(text):
     doc = nlp(text)
     keywords = [token.text for token in doc if not token.is_stop and token.is_alpha]
     keywords = [keyword.lower() for keyword in keywords if keyword.lower() not in stop_words]
     return keywords
 
+# Función encargada de buscar hashtags en el texto de los tweets y almacenarlos en la base de datos
 def search_hashtags_from_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({'hashtags': []})
@@ -122,6 +145,7 @@ def search_hashtags_from_tweets():
         hashtags = search_keywords_in_text(tweet['text'])
         collection.update_one( {'_id': tweet['_id']}, {'$set': {'hashtags': hashtags}} )
 
+# Función encargada de clasificar los tweets según su contenido
 def clasify_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({'clasificado': 'Pendiente'})
@@ -130,6 +154,7 @@ def clasify_tweets():
     for result in prediction_result:
         collection.update_one({'_id': result['_id']}, {'$set': {'clasificado': result['clasificado']}})
 
+# Función encargada de realizar predicciones sobre los tweets a clasificar
 def do_predictions(tweets_to_train, tweets_to_process):
     textos_nuevos = [tweet["text"] for tweet in tweets_to_process]
     textos = [tweet["text"] for tweet in tweets_to_train]
@@ -153,6 +178,7 @@ def do_predictions(tweets_to_train, tweets_to_process):
     tweets_to_process['prediccion'] = etiquetas_predichas_binarias
     return tweets_to_process
 
+# Función para enumerar los tweets presentes en la base de datos
 def ennumerate_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({})
@@ -161,6 +187,7 @@ def ennumerate_tweets():
         count = count + 1
         collection.update_one( {'_id': tweet['_id']}, {'$set': {'tweet_id': count}} )
 
+# Función para iniciar la búsqueda de los tweets que han sido generados en el día cuando se cumple la condición de horario
 def search_new_tweets():
     if hora_actual_entre_rango('22:00:00', '22:02:00'):
         fecha_actual = datetime.today().strftime('%Y-%m-%d')

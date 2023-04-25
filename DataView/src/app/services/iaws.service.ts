@@ -16,7 +16,7 @@ export class IawsService {
     this.options = {headers: headers};
   }
 
-  hashtags() {
+  get_hashtags() {
     this.build_headers();
     const data = {};
     return this.http.post(environment.api_ia + 'hashtags', JSON.stringify(data), this.options ).toPromise();
@@ -32,12 +32,6 @@ export class IawsService {
     this.build_headers();
     const data = {tweets: tweets};
     return this.http.post(environment.api_ia + 'upload_tweets_backup', JSON.stringify(data), this.options ).toPromise();
-  }
-
-  get_tweets_to_process() {
-    this.build_headers();
-    const data = {};
-    return this.http.post(environment.api_ia + 'get_tweets_to_process', JSON.stringify(data), this.options ).toPromise();
   }
 
   update_tweet(tweet_id: Number, clasificado: string) {

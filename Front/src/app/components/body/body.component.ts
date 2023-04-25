@@ -76,7 +76,7 @@ export class BodyComponent implements OnInit{
       if (this.ready_cloud_data && this.ready_tweet_data) {
         this.spinner.hide();
       }
-    }).catch(e => { console.log(e); });
+    }).catch((e: any) => { console.log(e); });
   }
 
   get_tweets() {
@@ -101,24 +101,24 @@ export class BodyComponent implements OnInit{
           this.build_images_to_report();
         }, 2000);
       }
-    }).catch(e => { console.log(e); });
+    }).catch((e: any) => { console.log(e); });
   }
 
   build_images_to_report() {
     this.spinner.hide();
-    html2canvas(this.cloudword_div.nativeElement).then((canvas) => {
+    html2canvas(this.cloudword_div.nativeElement).then((canvas: any) => {
       this.cloudword_img = canvas.toDataURL('image/png;base64');
       sessionStorage.setItem('cloudword_img', this.cloudword_img);
     });
-    html2canvas(this.linechart_div.nativeElement).then((canvas) => {
+    html2canvas(this.linechart_div.nativeElement).then((canvas: any) => {
       this.linechart_img = canvas.toDataURL('image/png;base64');
       sessionStorage.setItem('linechart_img', this.linechart_img);
     });
-    html2canvas(this.barchart_div.nativeElement).then((canvas) => {
+    html2canvas(this.barchart_div.nativeElement).then((canvas: any) => {
       this.barchart_img = canvas.toDataURL('image/png;base64');
       sessionStorage.setItem('barchart_img', this.barchart_img);
     });
-    html2canvas(this.radarchart_div.nativeElement).then((canvas) => {
+    html2canvas(this.radarchart_div.nativeElement).then((canvas: any) => {
       this.radarchart_img = canvas.toDataURL('image/png;base64');
       sessionStorage.setItem('radarchart_img', this.radarchart_img);
     });
