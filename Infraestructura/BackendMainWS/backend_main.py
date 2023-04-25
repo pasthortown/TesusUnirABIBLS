@@ -84,7 +84,8 @@ def upload_hashtags_backup(hashtags):
     collection_t = db['hashtags']
     collection_t.drop()
     collection = db['hashtags']
-    for hashtag in hashtags:
+    toInsert = [{'hashtag': h['text'], 'count': h['weight']} for i, h in enumerate(hashtags)]
+    for hashtag in toInsert:
         collection.insert_one(hashtag)
     return {'response':'success', 'status':200}
 

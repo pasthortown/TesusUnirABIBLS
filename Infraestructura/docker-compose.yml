@@ -4,7 +4,7 @@ networks:
   project_net:
     ipam:
       config:
-        - subnet: 172.89.0.0/24
+        - subnet: 172.91.0.0/24
 
 services:
   # Permite la generación y exportación de documentos PDF y códigos QR
@@ -22,7 +22,7 @@ services:
     - ./variables.env
     networks:
       project_net:
-        ipv4_address: 172.89.0.10
+        ipv4_address: 172.91.0.10
     links:
     - assets
   backend_main:
@@ -43,7 +43,7 @@ services:
     - ./logs/logs_backend_main.txt:/usr/src/app/logs.txt
     networks:
       project_net:
-        ipv4_address: 172.89.0.11
+        ipv4_address: 172.91.0.11
     links:
     - mongo_ia_data
   data_analizer:
@@ -61,7 +61,7 @@ services:
     - ./logs/logs_data_analizer.txt:/usr/src/app/logs.txt
     networks:
       project_net:
-        ipv4_address: 172.89.0.12
+        ipv4_address: 172.91.0.12
     links:
     - mongo_ia_data
   mongo_ia_data:
@@ -74,7 +74,7 @@ services:
     - ./variables.env
     networks:
       project_net:
-        ipv4_address: 172.89.0.13
+        ipv4_address: 172.91.0.13
   mongo_ia_data_express:
     # Interfaz de administracion de MongoDB
     image: mongo-express:latest
@@ -87,7 +87,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongo_ia_data
     networks:
       project_net:
-        ipv4_address: 172.89.0.14
+        ipv4_address: 172.91.0.14
     links:
     - mongo_ia_data
   assets:
@@ -101,4 +101,4 @@ services:
     - ./httpd_conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
     networks:
       project_net:
-        ipv4_address: 172.89.0.15
+        ipv4_address: 172.91.0.15
