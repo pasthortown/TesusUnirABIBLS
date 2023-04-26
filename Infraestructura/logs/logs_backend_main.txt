@@ -3,3 +3,4 @@ INFO:tornado.access:200 OPTIONS /get_all_tweets (172.91.0.1) 0.42ms
 INFO:tornado.access:200 POST /get_all_tweets (172.91.0.1) 88.57ms
 INFO:tornado.access:200 OPTIONS /hashtags (172.91.0.1) 0.31ms
 INFO:tornado.access:200 POST /hashtags (172.91.0.1) 2.66ms
+DEBUG:asyncio:Using selector: EpollSelector

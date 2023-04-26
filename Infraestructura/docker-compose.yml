@@ -102,3 +102,22 @@ services:
     networks:
       project_net:
         ipv4_address: 172.91.0.15
+  backend_main_back:
+    # Conecta la BDD Mongo con el FRONTEND
+    image: backend_main_back
+    build:
+      context: .
+      dockerfile: ./DockerFiles/backend_main_back.dockerfile
+    restart: always
+    ports:
+    - "8585:5050"
+    env_file:
+    - ./variables.env
+    environment:
+      mongo_bdd: ia
+      mongo_bdd_server: mongo_ia_data
+    networks:
+      project_net:
+        ipv4_address: 172.91.0.16
+    links:
+    - mongo_ia_data
