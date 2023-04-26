@@ -645,9 +645,16 @@ export class AppComponent {
     const file &#x3D; event.target.files[0];
     const reader &#x3D; new FileReader();
     reader.onload &#x3D; () &#x3D;&gt; {
-      const content &#x3D; reader.result as string;
+      const content &#x3D; JSON.parse(reader.result as string);
+      const tweets &#x3D; content.map(({ _id: { $oid }, created_at, ...rest }: any) &#x3D;&gt; {
+        const createdAt &#x3D; new Date(created_at.$date).toISOString();
+        return {
+          ...rest,
+          created_at: createdAt
+        };
+      });
       this.spinner.show();
-      this.iaService.upload_tweets_backup(JSON.parse(content)).then((r: any) &#x3D;&gt; {
+      this.iaService.upload_tweets_backup(tweets).then((r: any) &#x3D;&gt; {
         this.spinner.hide();
         this.toastr.success(&#x27;Carga Realizada Satisfactoriamente&#x27;, &#x27;Tweets&#x27;);
       }).catch((e: any) &#x3D;&gt; { console.log(e); });

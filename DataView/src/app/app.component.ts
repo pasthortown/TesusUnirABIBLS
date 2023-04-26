@@ -73,9 +73,16 @@ export class AppComponent {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      const content = reader.result as string;
+      const content = JSON.parse(reader.result as string);
+      const tweets = content.map(({ _id: { $oid }, created_at, ...rest }: any) => {
+        const createdAt = new Date(created_at.$date).toISOString();
+        return {
+          ...rest,
+          created_at: createdAt
+        };
+      });
       this.spinner.show();
-      this.iaService.upload_tweets_backup(JSON.parse(content)).then((r: any) => {
+      this.iaService.upload_tweets_backup(tweets).then((r: any) => {
         this.spinner.hide();
         this.toastr.success('Carga Realizada Satisfactoriamente', 'Tweets');
       }).catch((e: any) => { console.log(e); });

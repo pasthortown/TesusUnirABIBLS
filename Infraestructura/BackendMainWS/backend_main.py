@@ -15,6 +15,7 @@ import jwt
 from dateutil import parser
 import logging
 from collections import defaultdict
+from dateutil.parser import parse
 
 # Función para escribir en el archivo de log
 def write_log(content):
@@ -95,6 +96,8 @@ def upload_tweets_backup(tweets):
     collection_t.drop()
     collection = db['tweets']
     for tweet in tweets:
+        created_at = parse(tweet['created_at'])
+        tweet['created_at'] = created_at
         collection.insert_one(tweet)
     return {'response':'success', 'status':200}
 
