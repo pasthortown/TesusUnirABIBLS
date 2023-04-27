@@ -23,7 +23,7 @@
             height: 4cm;
             background-image: url('http://assets/files/images/header_print.png'), url(data:image/png;base64,{{qr}});
             background-repeat: no-repeat, no-repeat;
-            background-position: 0cm 0cm, 3cm 0cm;
+            background-position: 0cm 0cm, 1.5cm 0cm;
             background-size: 100% 4cm, 3.5cm auto;
         }
     </style>
@@ -34,8 +34,8 @@
         <div style="text-align: right; width: 100%;">{{fecha}}</div>
         <br/><br/>
         <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Hashtags o palabras clave más utilizadas</b><br/>
-            La gráfica que se presenta muestra las palabras clave identificadas en tweets xenofóbicos, las cuales han sido obtenidas mediante el uso de las librerías <b>spaCy</b> y <b>Natural Language Toolkit</b> de Python. El tamaño de las palabras en la gráfica indica su frecuencia de uso en los tweets.<br/>
-            Para llevar a cabo este análisis, cada tweet fue procesado con la librería <b>spaCy</b> para identificar las palabras clave. Posteriormente, se utilizó la librería <b>Natural Language Toolkit</b> para limpiar la lista de palabras clave identificadas, eliminando aquellas que no aportan significado (stopwords).</p>
+            La gráfica que se presenta muestra las palabras clave identificadas en tweets que presentan temas xenofóbicos, las cuales han sido obtenidas mediante el uso de las librerías <a href="https://spacy.io/"><b>spaCy</b></a> y <a href="https://www.nltk.org/"><b>Natural Language Toolkit</b></a> de Python. El tamaño de las palabras en la gráfica indica su frecuencia de uso en los tweets.<br/>
+            Para llevar a cabo este análisis, cada tweet fue procesado con la librería <a href="https://spacy.io/"><b>spaCy</b></a> para identificar las palabras clave. Posteriormente, se utilizó la librería <a href="https://www.nltk.org/"><b>Natural Language Toolkit</b></a> para limpiar la lista de palabras clave identificadas, eliminando aquellas que no aportan significado (stopwords).</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
             <tbody>
@@ -46,13 +46,12 @@
         </table>
         <br/><br/>
         <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Frecuencia de tweets xenofóbicos</b><br/>
-            La gráfica muestra la cantidad de tweets clasificados como xenofóbicos por mes.<br/>
-            Utilizamos una red neuronal creada con <b>Keras</b> y entrenada con un dataset de 2000 tweets previamente clasificados para la tarea.</p>
+            La gráfica muestra la cantidad de tweets clasificados como relacionados a temas xenofóbicos por mes. Utilizamos una red neuronal creada con <a href="https://keras.io/">Keras</a> y entrenada con un dataset de 2000 tweets previamente clasificados.</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td><img src="{{lines_chart}}" style="width: auto; height: 600px;"/></td>
+                    <td><img src="{{lines_chart}}" style="width: auto; height: 500px;"/></td>
                 </tr>
             </tbody>
         </table>
@@ -60,33 +59,33 @@
             <div class="header"></div>
         </div>
         <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Tendencias geográficas</b><br/>
-            La gráfica muestra la cantidad de tweets por ubicación geográfica. La etiqueta "NONE" agrupa los tweets donde el usuario no especificó un país en la configuración de ubicación. Es posible que algunos tweets hayan sido emitidos desde una ubicación diferente a la establecida en la configuración.</p>
+            La gráfica muestra la cantidad de tweets por ubicación geográfica. La etiqueta "NONE" agrupa los tweets donde existe ambigüedad respecto al origen del tweet.</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td><img src="{{bars_chart}}" style="width: auto; height: 600px;"/></td>
+                    <td><img src="{{bars_chart}}" style="width: auto; height: 500px;"/></td>
                 </tr>
             </tbody>
         </table>
         <br/><br/>
         <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Distribución por género</b><br/>
-            La gráfica representa el conteo de tweets clasificados como xenófobos y que se han agrupado según el género de sus autores.</p>
+            La gráfica representa el conteo de tweets clasificados como referentes a temas xenófobicos y que se han agrupado según el género de sus autores.</p>
         <br/><br/>
         <table style="text-align: center; width: 100%;">
             <tbody>
                 <tr>
-                    <td><img src="{{radar_chart}}" style="width: auto; height: 600px;"/></td>
+                    <td><img src="{{radar_chart}}" style="width: auto; height: 500px;"/></td>
                 </tr>
             </tbody>
         </table>
         <div class="page_break">
             <div class="header"></div>
         </div>
-        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Tweets clasificados como Xenofóbicos en este mes</b><br/></p>
+        <p style="text-align: justify; width: 100%;"><b style="font-size: 20px;">Tweets clasificados como referentes a temas Xenofóbicos en este mes</b><br/></p>
         <table style="text-align: left; width: 100%;">
             {% for tweet in tweets %}
-            {% if loop.index % 60 == 0  %}
+            {% if loop.index % 25 == 0  %}
             </table>  
             <div class="page_break">
             <div class="header"></div>
