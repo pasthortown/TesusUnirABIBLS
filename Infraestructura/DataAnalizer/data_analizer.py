@@ -20,6 +20,12 @@ from country_list import countries_for_language
 import re
 import time
 
+class lossAlcanzadoCallback(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if(logs.get('accuracy')> 0.90):
+              logging.info("Alcanzado el 90% de precisión, se detiene el entrenamiento.")
+              self.model.stop_training = True
+
 # Función para escribir en el archivo de log
 def write_log(content):
     logging.info(content)
@@ -169,7 +175,11 @@ def do_predictions(tweets_to_train, tweets_to_process):
         tf.keras.layers.Dense(1, activation="sigmoid")
     ])
     modelo.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-    historial = modelo.fit(secuencias_texto, etiquetas, epochs=10, validation_split=0.2)
+    historial = modelo.fit(secuencias_texto, etiquetas, epochs=10, validation_split=0.2, callbacks=[lossAlcanzadoCallback()])
+    history_string = "Epoch\tLoss\tAccuracy\n"
+    for epoch, loss, accuracy in zip(historial.epoch, historial.history['loss'], historial.history['accuracy']):
+        history_string += f"{epoch}\t{loss:.4f}\t{accuracy:.4f}\n"
+    write_log(history_string)
     secuencias_texto_nuevos = tokenizer.texts_to_sequences(textos_nuevos)
     secuencias_texto_nuevos = tf.keras.preprocessing.sequence.pad_sequences(secuencias_texto_nuevos, padding="post", maxlen=50)
     predicciones = modelo.predict(secuencias_texto_nuevos)
