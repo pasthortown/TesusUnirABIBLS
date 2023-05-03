@@ -123,12 +123,17 @@ def get_tweets_by_query(query, since_date, until_date, items_count=100):
         })
     return output
 
-# Función encargada de buscar tweets por fecha y almacenarlos en la base de datos
-def search_tweets_and_store_on_db(since_date, until_date):
+# Función encargada de actualizar los hashtags en la base de datos
+def update_hashtags_on_db():
     hashtags_on_db = select_hasgtags_on_db()
     collection_h = db['hashtags']
     collection_h.drop()
     collection_h.insert_many(hashtags_on_db)
+    
+# Función encargada de buscar tweets por fecha y almacenarlos en la base de datos
+def search_tweets_and_store_on_db(since_date, until_date):
+    collection_h = db['hashtags']
+    hashtags_on_db = collection_h.find({})
     hashtags = [h['hashtag'] for h in hashtags_on_db]
     collection = db['tweets']
     query = " OR #".join(["#" + hashtag for hashtag in hashtags])
@@ -206,5 +211,6 @@ def search_new_tweets():
         time.sleep(3*60)
 
 search_hashtags_from_tweets()
+update_hashtags_on_db()
 # clasify_tweets()
 ennumerate_tweets()
