@@ -133,7 +133,7 @@ def update_hashtags_on_db():
 # Función encargada de buscar tweets por fecha y almacenarlos en la base de datos
 def search_tweets_and_store_on_db(since_date, until_date):
     collection_h = db['hashtags']
-    hashtags_on_db = collection_h.find({})
+    hashtags_on_db = collection_h.find({}).sort({'count': -1}).limit(20)
     hashtags = [h['hashtag'] for h in hashtags_on_db]
     collection = db['tweets']
     query = " OR #".join(["#" + hashtag for hashtag in hashtags])
