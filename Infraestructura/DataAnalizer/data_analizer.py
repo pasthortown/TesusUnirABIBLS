@@ -65,7 +65,7 @@ db = client[mongo_bdd]
 
 # Descarga de paquetes y modelos de lenguaje
 nltk.download('stopwords')
-stop_words = nltk.corpus.stopwords.words('spanish') + ['rt']
+stop_words = nltk.corpus.stopwords.words('spanish') + ['rt', 'u']
 nlp = spacy.load('es_core_news_sm')
 
 # Función para verificar si la hora actual se encuentra entre un rango dado de horas
@@ -204,13 +204,24 @@ def ennumerate_tweets():
 
 # Función para iniciar la búsqueda de los tweets que han sido generados en el día cuando se cumple la condición de horario
 def search_new_tweets():
-    if hora_actual_entre_rango('22:00:00', '22:02:00'):
+    if hora_actual_entre_rango('22:50:00', '22:52:00'):
         fecha_actual = datetime.today().strftime('%Y-%m-%d')
         fecha_siguiente = (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d')
         search_tweets_and_store_on_db(fecha_actual, fecha_siguiente)
+        update_hashtags_on_db()
         time.sleep(3*60)
+
+def log_hashtags():
+    collection_h = db['hashtags']
+    hashtags_on_db = collection_h.find({}).sort([('count', -1)]).limit(20)
+    hashtags = [h['hashtag'] for h in hashtags_on_db]
+    hashtag_list = "\"".join([", \"" + hashtag for hashtag in hashtags])
+    write_log('Hashtags:')
+    write_log(hashtag_list)
 
 search_hashtags_from_tweets()
 update_hashtags_on_db()
-# clasify_tweets()
+log_hashtags()
 ennumerate_tweets()
+search_new_tweets()
+clasify_tweets()
