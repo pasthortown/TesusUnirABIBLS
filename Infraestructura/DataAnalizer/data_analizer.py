@@ -19,6 +19,7 @@ import gender_guesser.detector as gender
 from country_list import countries_for_language
 import re
 import time
+import numpy as np
 
 class lossAlcanzadoCallback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs={}):
@@ -163,35 +164,69 @@ def clasify_tweets():
     tweets_to_train = collection.find({'clasificado': {'$ne': 'Pendiente'}})
     prediction_result = do_predictions(tweets_to_train, tweets_to_process)
     for result in prediction_result:
-        collection.update_one({'_id': result['_id']}, {'$set': {'clasificado': result['clasificado']}})
+        collection.update_one({'tweet_id': result['tweet_id']}, {'$set': {'clasificado': result['clasificado']}})
 
 # Función encargada de realizar predicciones sobre los tweets a clasificar
 def do_predictions(tweets_to_train, tweets_to_process):
-    textos_nuevos = [tweet["text"] for tweet in tweets_to_process]
-    textos = [tweet["text"] for tweet in tweets_to_train]
-    etiquetas = [tweet["clasificado"] for tweet in tweets_to_train]
+    # El arreglo textos_nuevos contendrá el texto de cada tweet a clasificar
+    textos_nuevos = []
+    # El arreglo to_return contendrá los indices de cada tweet y la clasificación realizada por la red neuronal.
+    to_return = []
+    for tweet in tweets_to_process:
+        textos_nuevos.append(tweet["text"])
+        to_return.append({'tweet_id': tweet["tweet_id"], 'clasificado': ''})
+    # El arreglo textos_entrenamiento contendrá el texto de cada tweet de entrenamiento
+    textos_entrenamiento = []
+    # El arreglo etiquetas contendrá la etiqueta de cada tweet de entrenamiento clasificada como Xenofóbico = 1 o Normal = 0
+    etiquetas = []
+    for tweet in tweets_to_train:
+        textos_entrenamiento.append(tweet["text"])
+        if tweet["clasificado"] == "Xenofóbico":
+            etiquetas.append(1)
+        else:
+            etiquetas.append(0)
+    # Creamos un objeto Tokenizer de Keras que se utilizará para convertir los textos en secuencias de números enteros.
     tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=10000, oov_token="<OOV>")
-    tokenizer.fit_on_texts(textos)
-    secuencias_texto = tokenizer.texts_to_sequences(textos)
+    # Entrenamos el tokenizador en los textos de entrenamiento para construir un índice de vocabulario y asignar un número entero a cada palabra.
+    tokenizer.fit_on_texts(textos_entrenamiento)
+    # Convertimos los textos de entrenamiento en secuencias de números enteros utilizando el índice de vocabulario construido por el tokenizador.
+    secuencias_texto = tokenizer.texts_to_sequences(textos_entrenamiento)
+    # Ajustamos las secuencias de texto a una longitud máxima de 60 y rellena las secuencias más cortas con ceros.
     secuencias_texto = tf.keras.preprocessing.sequence.pad_sequences(secuencias_texto, padding="post", maxlen=60)
+    # Convertimos secuencias_texto y etiquetas a un numpy_array para su utilización con tensorflow
+    secuencias_texto = np.array(secuencias_texto)
+    etiquetas = np.array(etiquetas)
+    # Creamos un modelo secuencial de Keras con una capa de embedding, una capa LSTM y una capa densa con activación sigmoidal.
     modelo = tf.keras.Sequential([
         tf.keras.layers.Embedding(input_dim=10000, output_dim=16, input_length=60),
         tf.keras.layers.LSTM(16),
         tf.keras.layers.Dense(1, activation="sigmoid")
     ])
+    # Compilamos el modelo con una función de pérdida de entropía cruzada binaria, un optimizador Adam y la métrica de precisión.
     modelo.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+    # Entrenamos el modelo utilizando el 80% de los datos para su preparación y el 20% para la validación. Si la precisión obtenida es igual o superior al 90%, se detiene el entrenamiento con el fin de optimizar el proceso y prevenir el sobreentrenamiento.
     historial = modelo.fit(secuencias_texto, etiquetas, epochs=10, validation_split=0.2, callbacks=[lossAlcanzadoCallback()])
+    # Guardamos el log correspondiente al resultado del entrenamiento.
     history_string = "Epoch\tLoss\tAccuracy\n"
     for epoch, loss, accuracy in zip(historial.epoch, historial.history['loss'], historial.history['accuracy']):
         history_string += f"{epoch}\t{loss:.4f}\t{accuracy:.4f}\n"
     write_log(history_string)
+    # Entrenamos el tokenizador utilizando los textos nuevos para construir un índice de vocabulario y asignar un número entero a cada palabra.
     secuencias_texto_nuevos = tokenizer.texts_to_sequences(textos_nuevos)
-    secuencias_texto_nuevos = tf.keras.preprocessing.sequence.pad_sequences(secuencias_texto_nuevos, padding="post", maxlen=50)
+    # Ajustamos las secuencias de textos nuevos a una longitud máxima de 60 y se rellenan las secuencias más cortas con ceros.
+    secuencias_texto_nuevos = tf.keras.preprocessing.sequence.pad_sequences(secuencias_texto_nuevos, padding="post", maxlen=60)
+    # Procedemos a clasificar los textos_nuevos mediante la red neuronal previamente entrenada. La predicción para cada texto será una probabilidad y si esta es alta (cerca de 1), se considerará que el tweet es xenofóbico.
     predicciones = modelo.predict(secuencias_texto_nuevos)
+    # Asociamos la etiqueta Xenofóbico si la predicción es superior a 0.5 caso contrario la etiqueta asociada sera Normal
     etiquetas_predichas_binarias = (predicciones > 0.5).astype(int)
-    etiquetas_predichas_binarias = ['Xenofóbico' if x == 1 else 'Normal' for x in etiquetas_predichas_binarias]
-    tweets_to_process['prediccion'] = etiquetas_predichas_binarias
-    return tweets_to_process
+    etiquetas_predichas = ['Xenofóbico' if x == 1 else 'Normal' for x in etiquetas_predichas_binarias]
+    # Agregamos una columna denominada prediccion al listado de tweets a procesar que contiene la clasificación realizada
+    index = 0
+    for tweet in to_return:
+        tweet['clasificado'] = etiquetas_predichas[index]
+        index = index + 1
+        write_log(str(tweet['tweet_id']) + ' ' + tweet['clasificado'])
+    return to_return
 
 # Función para enumerar los tweets presentes en la base de datos
 def ennumerate_tweets():
@@ -223,5 +258,5 @@ search_hashtags_from_tweets()
 update_hashtags_on_db()
 log_hashtags()
 ennumerate_tweets()
-search_new_tweets()
+#search_new_tweets()
 clasify_tweets()
