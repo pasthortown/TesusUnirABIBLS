@@ -168,6 +168,7 @@ def clasify_tweets():
             collection.update_one({'tweet_id': result['tweet_id']}, {'$set': {'clasificado': result['clasificado']}})
     else:
         write_log("No hay tweets pendientes para procesar")
+        
 # Función encargada de realizar predicciones sobre los tweets a clasificar
 def do_predictions(tweets_to_train, tweets_to_process):
     # El arreglo textos_nuevos contendrá el texto de cada tweet a clasificar
