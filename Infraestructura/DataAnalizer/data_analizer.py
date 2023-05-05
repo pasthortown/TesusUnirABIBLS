@@ -161,11 +161,12 @@ def search_hashtags_from_tweets():
 def clasify_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({'clasificado': 'Pendiente'})
-    tweets_to_train = collection.find({'clasificado': {'$ne': 'Pendiente'}})
-    prediction_result = do_predictions(tweets_to_train, tweets_to_process)
-    for result in prediction_result:
-        collection.update_one({'tweet_id': result['tweet_id']}, {'$set': {'clasificado': result['clasificado']}})
-
+    if tweets_to_process.count() > 0:
+        tweets_to_train = collection.find({'clasificado': {'$ne': 'Pendiente'}})
+        prediction_result = do_predictions(tweets_to_train, tweets_to_process)
+        for result in prediction_result:
+            collection.update_one({'tweet_id': result['tweet_id']}, {'$set': {'clasificado': result['clasificado']}})
+    
 # Función encargada de realizar predicciones sobre los tweets a clasificar
 def do_predictions(tweets_to_train, tweets_to_process):
     # El arreglo textos_nuevos contendrá el texto de cada tweet a clasificar
@@ -254,9 +255,9 @@ def log_hashtags():
     write_log('Hashtags:')
     write_log(hashtag_list)
 
+clasify_tweets()
 search_hashtags_from_tweets()
 update_hashtags_on_db()
 log_hashtags()
 ennumerate_tweets()
 #search_new_tweets()
-clasify_tweets()
