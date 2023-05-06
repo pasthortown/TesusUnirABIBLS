@@ -257,9 +257,9 @@ def log_hashtags():
     write_log('Hashtags:')
     write_log(hashtag_list)
 
+ennumerate_tweets()
 clasify_tweets()
 search_hashtags_from_tweets()
 update_hashtags_on_db()
 log_hashtags()
-ennumerate_tweets()
 #search_new_tweets()
