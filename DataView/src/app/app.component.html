@@ -30,7 +30,22 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let tweet of tweets">
+        <tr>
+          <td>
+          </td>
+          <td>
+
+          </td>
+          <td>
+            <select class="form-select" [(ngModel)]="filter" (change)="filter_change()">
+              <option selected value="all">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Xenofóbico">Xenofóbico</option>
+              <option value="Normal">Normal</option>
+            </select>
+          </td>
+        </tr>
+        <tr *ngFor="let tweet of tweets_shown">
           <th> {{tweet.tweet_id}} </th>
           <td> {{tweet.text}} </td>
           <td>

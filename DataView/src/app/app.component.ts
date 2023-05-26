@@ -12,7 +12,9 @@ import { FileSaverService } from 'ngx-filesaver';
 export class AppComponent {
   title = 'DataView';
   tweets: any[] = [];
+  tweets_shown: any[] = [];
   hashtags: any[] = [];
+  filter: string = 'all';
 
   constructor(
     private iaService: IawsService,
@@ -24,11 +26,20 @@ export class AppComponent {
     this.get_tweets();
   }
 
+  filter_change() {
+    if (this.filter != 'all') {
+      this.tweets_shown = this.tweets.filter(tweet => tweet.clasificado === this.filter);
+    } else {
+      this.tweets_shown = this.tweets;
+    }
+  }
+
   get_tweets() {
     this.spinner.show();
     this.iaService.get_all_tweets().then((r: any) => {
       this.spinner.hide();
       this.tweets = r.response;
+      this.filter_change();
       this.get_hashtags();
     }).catch((e: any) => { console.log(e); });
   }

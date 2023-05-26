@@ -2,14 +2,17 @@ logs
 DEBUG:tweepy.api:PARAMS: {}
 DEBUG:requests_oauthlib.oauth1_auth:Signing request <PreparedRequest [GET]> using client <Client client_key=HQcZWdKO9rVfRocK5nhGX86eG, client_secret=****, resource_owner_key=1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX, resource_owner_secret=****, signature_method=HMAC-SHA1, signature_type=AUTH_HEADER, callback_uri=None, rsa_key=None, verifier=None, realm=None, encoding=utf-8, decoding=None, nonce=None, timestamp=None>
 DEBUG:requests_oauthlib.oauth1_auth:Including body in call to sign: False
-DEBUG:oauthlib.oauth1.rfc5849:Collected params: [('oauth_nonce', '148899477833452271741683341931'), ('oauth_timestamp', '1683341931'), ('oauth_version', '1.0'), ('oauth_signature_method', 'HMAC-SHA1'), ('oauth_consumer_key', 'HQcZWdKO9rVfRocK5nhGX86eG'), ('oauth_token', '1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX')]
-DEBUG:oauthlib.oauth1.rfc5849:Normalized params: oauth_consumer_key=HQcZWdKO9rVfRocK5nhGX86eG&oauth_nonce=148899477833452271741683341931&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1683341931&oauth_token=1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX&oauth_version=1.0
+DEBUG:oauthlib.oauth1.rfc5849:Collected params: [('oauth_nonce', '126955074736426658661685114361'), ('oauth_timestamp', '1685114361'), ('oauth_version', '1.0'), ('oauth_signature_method', 'HMAC-SHA1'), ('oauth_consumer_key', 'HQcZWdKO9rVfRocK5nhGX86eG'), ('oauth_token', '1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX')]
+DEBUG:oauthlib.oauth1.rfc5849:Normalized params: oauth_consumer_key=HQcZWdKO9rVfRocK5nhGX86eG&oauth_nonce=126955074736426658661685114361&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1685114361&oauth_token=1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX&oauth_version=1.0
 DEBUG:oauthlib.oauth1.rfc5849:Normalized URI: https://api.twitter.com/1.1/account/verify_credentials.json
-DEBUG:oauthlib.oauth1.rfc5849:Signing: signature base string: GET&https%3A%2F%2Fapi.twitter.com%2F1.1%2Faccount%2Fverify_credentials.json&oauth_consumer_key%3DHQcZWdKO9rVfRocK5nhGX86eG%26oauth_nonce%3D148899477833452271741683341931%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1683341931%26oauth_token%3D1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX%26oauth_version%3D1.0
-DEBUG:oauthlib.oauth1.rfc5849:Signature: mouKihwiNyBCzgqZJTK8rqvH+f8=
+DEBUG:oauthlib.oauth1.rfc5849:Signing: signature base string: GET&https%3A%2F%2Fapi.twitter.com%2F1.1%2Faccount%2Fverify_credentials.json&oauth_consumer_key%3DHQcZWdKO9rVfRocK5nhGX86eG%26oauth_nonce%3D126955074736426658661685114361%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1685114361%26oauth_token%3D1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX%26oauth_version%3D1.0
+DEBUG:oauthlib.oauth1.rfc5849:Signature: WGnX8TDUJegYiCsd8z236f/DhCU=
 DEBUG:requests_oauthlib.oauth1_auth:Updated url: https://api.twitter.com/1.1/account/verify_credentials.json
-DEBUG:requests_oauthlib.oauth1_auth:Updated headers: {'User-Agent': 'Python/3.8.16 Requests/2.30.0 Tweepy/4.13.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'OAuth oauth_nonce="148899477833452271741683341931", oauth_timestamp="1683341931", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", oauth_consumer_key="HQcZWdKO9rVfRocK5nhGX86eG", oauth_token="1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX", oauth_signature="mouKihwiNyBCzgqZJTK8rqvH%2Bf8%3D"'}
+DEBUG:requests_oauthlib.oauth1_auth:Updated headers: {'User-Agent': 'Python/3.8.16 Requests/2.30.0 Tweepy/4.13.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'OAuth oauth_nonce="126955074736426658661685114361", oauth_timestamp="1685114361", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", oauth_consumer_key="HQcZWdKO9rVfRocK5nhGX86eG", oauth_token="1646478811620429825-o8y3bqQeE5ySEUA29KyeNUnFO99xyX", oauth_signature="WGnX8TDUJegYiCsd8z236f%2FDhCU%3D"'}
 DEBUG:requests_oauthlib.oauth1_auth:Updated body: None
 DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): api.twitter.com:443
 DEBUG:urllib3.connectionpool:https://api.twitter.com:443 "GET /1.1/account/verify_credentials.json HTTP/1.1" 200 565
 INFO:root:Conexión a Twitter Exitosa
+INFO:root:No hay tweets pendientes para procesar
+INFO:root:Hashtags:
+INFO:root:, "violencia", "mujer", "méxico", "víctima", "apoyo", "legisladora", "violación", "denunciado", "legislad", "matan", "datos", "sangriento", "guacamayan", "sexenio", "relatos", "historia", "racismo", "bolivia", "hombre", "discriminación
