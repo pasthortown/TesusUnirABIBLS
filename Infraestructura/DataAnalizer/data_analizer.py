@@ -9,6 +9,8 @@ import os
 from pymongo import MongoClient
 import datetime
 from datetime import timedelta
+from bson import json_util
+import json
 import spacy
 import nltk
 import re
@@ -20,6 +22,7 @@ from country_list import countries_for_language
 import re
 import time
 import numpy as np
+import random
 
 class lossAlcanzadoCallback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs={}):
@@ -161,7 +164,8 @@ def search_hashtags_from_tweets():
 def clasify_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({'clasificado': 'Pendiente'})
-    if tweets_to_process.count() > 0:
+    tweets_por_procesar_array = json.loads(json_util.dumps(tweets_to_process))
+    if len(tweets_por_procesar_array) > 0:
         tweets_to_train = collection.find({'clasificado': {'$ne': 'Pendiente'}})
         prediction_result = do_predictions(tweets_to_train, tweets_to_process)
         for result in prediction_result:
@@ -197,8 +201,10 @@ def do_predictions(tweets_to_train, tweets_to_process):
     # Ajustamos las secuencias de texto a una longitud máxima de 60 y rellena las secuencias más cortas con ceros.
     secuencias_texto = tf.keras.preprocessing.sequence.pad_sequences(secuencias_texto, padding="post", maxlen=60)
     # Convertimos secuencias_texto y etiquetas a un numpy_array para su utilización con tensorflow
-    secuencias_texto = np.array(secuencias_texto)
     etiquetas = np.array(etiquetas)
+    secuencias_texto = np.array(secuencias_texto)
+    # Ordenamos aleatoriamente las secuencias de texto para que todos los tweets tengan la misma probabilidad de ser utilizados como entrenamiento o validación durante la etapa de acondicionamiento del modelo.
+    np.random.shuffle(secuencias_texto)
     # Creamos un modelo secuencial de Keras con una capa de embedding, una capa LSTM y una capa densa con activación sigmoidal.
     modelo = tf.keras.Sequential([
         tf.keras.layers.Embedding(input_dim=10000, output_dim=16, input_length=60),
@@ -251,9 +257,11 @@ def search_new_tweets():
 
 def log_hashtags():
     collection_h = db['hashtags']
-    hashtags_on_db = collection_h.find({}).sort([('count', -1)]).limit(20)
+    hashtags_on_db = collection_h.find({})
     hashtags = [h['hashtag'] for h in hashtags_on_db]
-    hashtag_list = "\"".join([", \"" + hashtag for hashtag in hashtags])
+    random.shuffle(hashtags)
+    primeros_20_hashtags = hashtags[:20]
+    hashtag_list = "\"".join([", \"" + hashtag for hashtag in primeros_20_hashtags])
     write_log('Hashtags:')
     write_log(hashtag_list)
 
