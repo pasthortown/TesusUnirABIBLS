@@ -1,1 +1,18 @@
 logs
+INFO:tornado.access:200 OPTIONS /hashtags (172.91.0.1) 5.01ms
+INFO:tornado.access:200 OPTIONS /tweets (172.91.0.1) 2.98ms
+INFO:tornado.access:200 POST /hashtags (172.91.0.1) 22.11ms
+INFO:tornado.access:200 POST /tweets (172.91.0.1) 61.97ms
+DEBUG:asyncio:Using selector: EpollSelector
+INFO:tornado.access:200 OPTIONS /get_all_tweets (172.91.0.1) 0.44ms
+INFO:tornado.access:200 POST /get_all_tweets (172.91.0.1) 314.98ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.91.0.1) 0.39ms
+INFO:tornado.access:200 POST /hashtags (172.91.0.1) 44.01ms
+INFO:tornado.access:200 OPTIONS /get_all_tweets (172.91.0.1) 0.36ms
+INFO:tornado.access:200 POST /get_all_tweets (172.91.0.1) 299.34ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.91.0.1) 0.47ms
+INFO:tornado.access:200 POST /hashtags (172.91.0.1) 7.08ms
+INFO:tornado.access:200 OPTIONS /get_all_tweets (172.91.0.1) 0.46ms
+INFO:tornado.access:200 POST /get_all_tweets (172.91.0.1) 365.19ms
+INFO:tornado.access:200 OPTIONS /hashtags (172.91.0.1) 0.45ms
+INFO:tornado.access:200 POST /hashtags (172.91.0.1) 16.23ms

@@ -167,6 +167,7 @@ def clasify_tweets():
     tweets_por_procesar_array = json.loads(json_util.dumps(tweets_to_process))
     if len(tweets_por_procesar_array) > 0:
         tweets_to_train = collection.find({'clasificado': {'$ne': 'Pendiente'}})
+        tweets_to_process = collection.find({'clasificado': 'Pendiente'})
         prediction_result = do_predictions(tweets_to_train, tweets_to_process)
         for result in prediction_result:
             collection.update_one({'tweet_id': result['tweet_id']}, {'$set': {'clasificado': result['clasificado']}})
