@@ -4,6 +4,7 @@
 #  - Procesamiento de lenguaje natural
 #  - La clasificación de texto
 #  - Conexión al API de twitter 
+#  - sklearn para creación del perceptron multicapa
 
 import os
 from pymongo import MongoClient
@@ -23,12 +24,28 @@ import re
 import time
 import numpy as np
 import random
+from sklearn.metrics import f1_score
+from sklearn.model_selection import train_test_split
+
 
 class lossAlcanzadoCallback(tf.keras.callbacks.Callback):
+    def __init__(self, target_f1=0.9, validation_data=None):
+        super(lossAlcanzadoCallback, self).__init__()
+        self.target_f1 = target_f1
+        self.validation_data = validation_data
+
     def on_epoch_end(self, epoch, logs={}):
-        if(logs.get('accuracy')> 0.90):
-              logging.info("Alcanzado el 90% de precisión, se detiene el entrenamiento.")
-              self.model.stop_training = True
+        if self.validation_data is not None:
+            # Datos marcados como verdaderos del conjunto de validación (Tweets que refieren a temas Xenofóbicos)
+            y_true = self.validation_data[1]
+            # Predicciones realizadas (Conjunto de validación)
+            y_pred = self.model.predict(self.validation_data[0])
+            # Calculamos el F1-score
+            f1 = f1_score(y_true, y_pred.round())
+            logging.info("F1-score: {}.".format(f1))
+            if f1 > self.target_f1:
+                logging.info("Superado el {} de F1-score, se detiene el entrenamiento.".format(self.target_f1))
+                self.model.stop_training = True
 
 # Función para escribir en el archivo de log
 def write_log(content):
@@ -215,7 +232,8 @@ def do_predictions(tweets_to_train, tweets_to_process):
     # Compilamos el modelo con una función de pérdida de entropía cruzada binaria, un optimizador Adam y la métrica de precisión.
     modelo.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
     # Entrenamos el modelo utilizando el 80% de los datos para su preparación y el 20% para la validación. Si la precisión obtenida es igual o superior al 90%, se detiene el entrenamiento con el fin de optimizar el proceso y prevenir el sobreentrenamiento.
-    historial = modelo.fit(secuencias_texto, etiquetas, epochs=10, validation_split=0.2, callbacks=[lossAlcanzadoCallback()])
+    secuencias_texto_entrenamiento, secuencias_texto_validacion, etiquetas_entrenamiento, etiquetas_validacion = train_test_split(secuencias_texto, etiquetas, test_size=0.2, random_state=42)
+    historial = modelo.fit(secuencias_texto_entrenamiento, etiquetas_entrenamiento, epochs=20, validation_data=(secuencias_texto_validacion, etiquetas_validacion), callbacks=[lossAlcanzadoCallback(validation_data=(secuencias_texto_validacion, etiquetas_validacion))])
     # Guardamos el log correspondiente al resultado del entrenamiento.
     history_string = "Epoch\tLoss\tAccuracy\n"
     for epoch, loss, accuracy in zip(historial.epoch, historial.history['loss'], historial.history['accuracy']):
