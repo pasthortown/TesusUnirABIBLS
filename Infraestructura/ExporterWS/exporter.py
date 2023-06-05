@@ -13,8 +13,8 @@ from io import BytesIO
 
 app_secret = os.getenv('app_secret')
 allowed_app_name = os.getenv('allowed_app_name')
-web_url = os.getenv('web_url')
 
+# Levantamiento del API URL "/" HTTP: GET
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -24,6 +24,7 @@ class DefaultHandler(RequestHandler):
     def get(self):
         self.write({'response':'Servicio de Exportación de Documentos Operativo','status':200})
 
+# Levantamiento del API HTTP: POST
 class ActionHandler(RequestHandler):
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -51,23 +52,25 @@ class ActionHandler(RequestHandler):
         self.write(respuesta)
         return
 
+# Función que devuelve en Base64 el la imágen con el código QR generada a partir del texto recibido
 def generate_qr(toEncode):
     buffered = BytesIO()
     img = qrcode.make(toEncode)
     img.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue())
     return {'response': img_str.decode('utf-8'), 'status':200}
-    
+
+# Función que devuelve en Base64 un PDF generado a partir de los parámetros recibidos
 def generate_pdf(template_name, params_in):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('Templates'))
     params = params_in
     params['app_name']=allowed_app_name
-    params['web_url']=web_url
     template = env.get_template(template_name)
     html_processed = template.render(params)
     toReturn = pdfkit.from_string(html_processed,False)
     return {'response': base64.b64encode(toReturn).decode('utf-8'), 'status':200}
 
+# Validación del token JWT para autorizar la comunicación con el API
 def validate_token(token):
     try:
         response = jwt.decode(token, app_secret, algorithms=['HS256'])
