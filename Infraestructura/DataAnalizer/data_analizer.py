@@ -99,7 +99,7 @@ def hora_actual_entre_rango(inicio, fin):
     else:
         return False
     
-# Función para obtener los hashtags de la base de datos de tweets clasificados como "Xenofóbico"
+# Función para obtener los hashtags de la base de datos de tweets clasificados como referentes a un tema "Xenofóbico"
 def select_hasgtags_on_db():
     collection = db['tweets']
     pipeline = [
@@ -257,7 +257,7 @@ def do_predictions(tweets_to_train, tweets_to_process):
     return to_return
 
 # Función para enumerar los tweets presentes en la base de datos
-def ennumerate_tweets():
+def enumerate_tweets():
     collection = db['tweets']
     tweets_to_process = collection.find({})
     count = 0
@@ -284,7 +284,8 @@ def log_hashtags():
     write_log('Hashtags:')
     write_log(hashtag_list)
 
-ennumerate_tweets()
+# Procesos que se ejecutan tras cada reinicio del contenedor
+enumerate_tweets()
 clasify_tweets()
 search_hashtags_from_tweets()
 update_hashtags_on_db()
