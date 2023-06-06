@@ -56,8 +56,6 @@ mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
 mongo_user = os.getenv('mongo_user')
 mongo_password = os.getenv('mongo_password')
-app_secret = os.getenv('app_secret')
-allowed_app_name = os.getenv('allowed_app_name')
 
 api_key = os.getenv('twitter_api_key')
 api_key_secret = os.getenv('twitter_api_key_secret')
@@ -225,8 +223,11 @@ def do_predictions(tweets_to_train, tweets_to_process):
     np.random.shuffle(secuencias_texto)
     # Creamos un modelo secuencial de Keras con una capa de embedding, una capa LSTM y una capa densa con activación sigmoidal.
     modelo = tf.keras.Sequential([
-        tf.keras.layers.Embedding(input_dim=10000, output_dim=16, input_length=60),
+        tf.keras.layers.Embedding(input_dim=100000, output_dim=16, input_length=60),
+        tf.keras.layers.LSTM(16, return_sequences=True), 
+        tf.keras.layers.Dropout(0.3),
         tf.keras.layers.LSTM(16),
+        tf.keras.layers.Dropout(0.3),
         tf.keras.layers.Dense(1, activation="sigmoid")
     ])
     # Compilamos el modelo con una función de pérdida de entropía cruzada binaria, un optimizador Adam y la métrica de precisión.
